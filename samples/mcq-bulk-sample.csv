@@ -1,0 +1,4 @@
+question,a,b,c,d,answer,marks
+"Which keyword is used to inherit a class in Java?",implements,extends,inherits,super,B,2
+"Size of int in Java (bits)?",8,16,32,64,C,2
+"Which method is the entry point of a Java program?",start(),run(),main(),init(),C,

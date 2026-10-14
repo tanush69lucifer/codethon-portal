@@ -1,0 +1,14 @@
+# Automatic HTTPS (Let's Encrypt) for $DOMAIN. Point the domain's A record at the VM first.
+{$DOMAIN} {
+	encode gzip zstd
+	reverse_proxy api:5000 {
+		header_up X-Forwarded-Proto {scheme}
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	request_body {
+		max_size 8MB
+	}
+}

@@ -1,0 +1,72 @@
+# Production stack on ONE Linux VM:  docker compose up -d --build
+# Caddy (HTTPS) -> api (Node) -> mongo.   worker pulls judge jobs from mongo and
+# starts one locked-down codethon-java-runner container per submission.
+#
+# Before the first `up`, build the sandbox image once:
+#   docker build -t codethon-java-runner:latest ./judge
+# (scripts/deploy.sh does all of this.)
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "1.5"]
+    volumes:
+      - mongo-data:/data/db
+    # Not published to the internet. For backups: docker compose exec mongo mongodump --archive > backup.archive
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongo:27017/codethon
+      PORT: "5000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    expose:
+      - "5000"
+
+  worker:
+    build: .
+    restart: unless-stopped
+    command: ["node", "src/worker.js"]
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongo:27017/codethon
+      JUDGE_MODE: docker
+    volumes:
+      # Lets the worker start sandbox containers on the host. Only our worker code uses it;
+      # candidate code runs inside --network none, read-only, non-root containers.
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
+  caddy-data:
+  caddy-config:
