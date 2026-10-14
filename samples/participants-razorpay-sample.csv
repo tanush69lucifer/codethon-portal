@@ -1,0 +1,6 @@
+id,amount,currency,status,order_id,method,email,contact,notes,created_at
+pay_N1aBcD001,19900,INR,captured,order_1,upi,aarav.sharma@example.com,+919800000001,"{""name"":""Aarav Sharma"",""category"":""Senior""}",12/10/2026 10:02:11
+pay_N1aBcD002,19900,INR,captured,order_2,card,diya.verma@example.com,+919800000002,"{""name"":""Diya Verma"",""category"":""Senior""}",12/10/2026 10:05:40
+pay_N1aBcD003,19900,INR,failed,order_3,upi,kabir.singh@example.com,+919800000003,"{""name"":""Kabir Singh"",""category"":""Senior""}",12/10/2026 10:07:02
+pay_N1aBcD004,19900,INR,captured,order_4,netbanking,meera.joshi@example.com,+919800000004,"{""name"":""Meera Joshi"",""category"":""Junior""}",12/10/2026 10:09:55
+pay_N1aBcD005,19900,INR,captured,order_5,upi,aarav.sharma@example.com,+919800000001,"{""name"":""Aarav Sharma"",""category"":""Senior""}",12/10/2026 10:11:20
