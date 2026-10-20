@@ -27,6 +27,7 @@ if ! timeout -s KILL "$CT" javac -J-Xmx384m -J-XX:+UseSerialGC -encoding UTF-8 -
 else
   echo "OK" > out/status
   : > out/results.txt
+  consecutive_tle=0
   for i in $(seq 1 "$N"); do
     s=$(date +%s%N)
     (
@@ -36,8 +37,24 @@ else
     )
     code=$?
     e=$(date +%s%N)
-    echo "$i $code $(( (e - s) / 1000000 ))" >> out/results.txt
+    wall_ms=$(( (e - s) / 1000000 ))
+    echo "$i $code $wall_ms" >> out/results.txt
     truncate -s '<16384' "out/$i.err" 2>/dev/null || true
+
+    if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then
+      consecutive_tle=$((consecutive_tle + 1))
+      if [ "$consecutive_tle" -ge 2 ] && [ "$i" -lt "$N" ]; then
+        # Early-exit on repeated TLE: avoid tying up worker slots for infinite loops
+        next=$((i + 1))
+        for j in $(seq "$next" "$N"); do
+          echo "$j 124 $wall_ms" >> out/results.txt
+          echo "Time Limit Exceeded" > "out/$j.err"
+        done
+        break
+      fi
+    else
+      consecutive_tle=0
+    fi
   done
 fi
 truncate -s '<16384' out/compile.txt 2>/dev/null || true

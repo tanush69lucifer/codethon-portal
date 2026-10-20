@@ -1,6 +1,8 @@
 node_modules/
 client/dist/
 .env
+.env.*
 *.log
+*.gz
 server/loadtest-report*
 .DS_Store

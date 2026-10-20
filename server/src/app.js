@@ -76,6 +76,14 @@ app.use('/api', notFound);
 
 // Serve the built React app from the same origin (simplest deploy, no CORS issues inside SEB).
 if (config.serveClient && fs.existsSync(path.join(config.clientDist, 'index.html'))) {
+  // Hashed Vite assets in /assets can be cached long-term and marked immutable
+  app.use(
+    '/assets',
+    express.static(path.join(config.clientDist, 'assets'), {
+      immutable: true,
+      maxAge: '1y',
+    })
+  );
   app.use(express.static(config.clientDist, { index: false, maxAge: '1h' }));
   app.get('*', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
