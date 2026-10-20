@@ -30,39 +30,71 @@ function TestPills({ tests }) {
 }
 
 function ResultView({ result }) {
-  if (!result) return <div className="muted small">Run your code on the sample tests or your own input. Submit to judge it on hidden tests.</div>;
+  if (!result) return <div className="muted small" style={{ padding: '6px 0' }}>Click <b>Run</b> to test on sample inputs or <b>Submit</b> to evaluate on hidden test cases.</div>;
   if (result.pending) {
-    return <div className="muted">{result.queuePosition ? `In queue (position ${result.queuePosition})…` : 'Judging…'}</div>;
+    return (
+      <div className="row small" style={{ alignItems: 'center', gap: 8, padding: '8px 0' }}>
+        <span className="dot" style={{ background: 'var(--primary)' }} />
+        <span className="muted font-bold">{result.queuePosition ? `In judge queue (position ${result.queuePosition})…` : 'Compiling and judging…'}</span>
+      </div>
+    );
   }
   if (result.error) return <div className="error-box">{result.error}</div>;
   const tone = verdictTone(result.verdict);
   return (
-    <div className="stack" style={{ gap: 8 }}>
-      <div className="row">
-        <span className={`badge ${tone}`}>{VERDICT_LABEL[result.verdict] || result.verdict}</span>
+    <div className="stack" style={{ gap: 10 }}>
+      <div className="row" style={{ alignItems: 'center', gap: 10 }}>
+        <span className={`badge ${tone}`} style={{ fontSize: 13, padding: '4px 10px' }}>
+          {VERDICT_LABEL[result.verdict] || result.verdict}
+        </span>
         {result.kind === 'SUBMIT' && result.verdict !== 'CE' && (
           <span className="small">
             Passed <b>{result.passed}</b>/{result.total} hidden tests · Score <b className="num">{result.score}</b>/{result.maxScore}
           </span>
         )}
       </div>
-      {result.compileOutput && <pre style={{ color: 'var(--bad)' }}>{result.compileOutput}</pre>}
+      {result.compileOutput && (
+        <div className="stack" style={{ gap: 4 }}>
+          <div className="small muted font-bold" style={{ color: 'var(--bad)' }}>Compilation Error:</div>
+          <pre style={{ color: 'var(--bad)', background: 'var(--bad-soft)', margin: 0, padding: 10, borderRadius: 6, maxHeight: 160, overflowY: 'auto' }}>
+            {result.compileOutput}
+          </pre>
+        </div>
+      )}
       {result.kind === 'SUBMIT' && result.tests?.length > 0 && <TestPills tests={result.tests} />}
       {result.kind === 'RUN' &&
         result.runOutputs?.map((o, i) => (
-          <div key={i} className="stack" style={{ gap: 4 }}>
-            <div className="row small">
-              <b>{o.expected != null ? `Sample ${i + 1}` : 'Your input'}</b>
+          <div key={i} className="test-card stack" style={{ gap: 8 }}>
+            <div className="row small" style={{ alignItems: 'center', gap: 8 }}>
+              <b>{o.expected != null ? `Sample Case ${i + 1}` : 'Custom Input Test'}</b>
               <span className={`badge ${verdictTone(o.verdict)}`}>{VERDICT_LABEL[o.verdict] || o.verdict}</span>
               <span className="muted">{o.timeMs} ms</span>
             </div>
-            <div className="grid2">
-              <div><div className="small muted">Input</div><pre>{o.input || ' '}</pre></div>
-              {o.expected != null && <div><div className="small muted">Expected</div><pre>{o.expected || ' '}</pre></div>}
-              <div><div className="small muted">Your output</div><pre>{o.stdout || ' '}</pre></div>
+            <div className="test-io-grid">
+              <div className="stack" style={{ gap: 4 }}>
+                <div className="small muted font-bold">Input</div>
+                <pre className="io-box">{o.input ? o.input.trim() : '(empty)'}</pre>
+              </div>
+              {o.expected != null && (
+                <div className="stack" style={{ gap: 4 }}>
+                  <div className="small muted font-bold">Expected Output</div>
+                  <pre className="io-box">{o.expected ? o.expected.trim() : '(empty)'}</pre>
+                </div>
+              )}
+              <div className="stack" style={{ gap: 4 }}>
+                <div className="small muted font-bold">Your Output</div>
+                <pre className={`io-box ${o.verdict === 'AC' || o.verdict === 'OK' ? 'io-ok' : 'io-bad'}`}>
+                  {o.stdout ? o.stdout.trim() : '(no output)'}
+                </pre>
+              </div>
             </div>
             {o.stderr && (
-              <div><div className="small muted">Error output</div><pre style={{ color: 'var(--bad)' }}>{o.stderr}</pre></div>
+              <div className="stack" style={{ gap: 4 }}>
+                <div className="small muted font-bold" style={{ color: 'var(--bad)' }}>Standard Error</div>
+                <pre style={{ color: 'var(--bad)', background: 'var(--bad-soft)', margin: 0, padding: 8, borderRadius: 6, maxHeight: 80, overflowY: 'auto' }}>
+                  {o.stderr}
+                </pre>
+              </div>
             )}
           </div>
         ))}
@@ -181,20 +213,25 @@ export default function CodingSection({ contestId, problem, initialCode, best, e
             Reset
           </button>
         </div>
-        <Suspense fallback={<div style={{ color: '#aaa', padding: 16 }}>Loading editor…</div>}>
-          <CodeEditor path={`problem-${problem._id}.java`} value={code} onChange={change} editorCopyRef={editorCopyRef} />
-        </Suspense>
-        <div className="console">
+        <div className="editor-canvas">
+          <Suspense fallback={<div style={{ color: '#aaa', padding: 16 }}>Loading editor…</div>}>
+            <CodeEditor path={`problem-${problem._id}.java`} value={code} onChange={change} editorCopyRef={editorCopyRef} />
+          </Suspense>
+        </div>
+        <div className={`console ${result || customOn ? 'has-content' : ''}`}>
           <div className="console-head">
-            <label className="check small">
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Test Cases & Output
+            </span>
+            <span className="grow" />
+            <label className="check small" style={{ marginRight: 8 }}>
               <input type="checkbox" checked={customOn} onChange={(e) => setCustomOn(e.target.checked)} /> Custom input
             </label>
-            <span className="grow" />
             <button className="btn sm" disabled={busy || disabled} onClick={() => judge('RUN')}>
-              ▶ Run
+              {busy ? 'Running…' : '▶ Run'}
             </button>
             <button className="btn sm primary" disabled={busy || disabled} onClick={() => judge('SUBMIT')}>
-              Submit
+              {busy ? 'Submitting…' : 'Submit'}
             </button>
           </div>
           <div className="console-body stack" style={{ gap: 8 }}>
