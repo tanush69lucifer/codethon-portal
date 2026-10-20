@@ -98,8 +98,21 @@ async function execute({ code, inputs, timeLimitMs, memoryMb }) {
 
   let child;
   if (config.judge.mode === 'local') {
-    child = spawn('bash', [config.judge.runnerScript], {
-      env: { PATH: process.env.PATH, HOME: os.tmpdir(), TMPDIR: os.tmpdir(), LANG: 'C.UTF-8', ...env },
+    let bashCmd = 'bash';
+    let scriptPath = config.judge.runnerScript;
+    const envObj = { PATH: process.env.PATH, HOME: os.tmpdir(), TMPDIR: os.tmpdir(), LANG: 'C.UTF-8', ...env };
+    if (process.platform === 'win32') {
+      const fs = require('fs');
+      const gitBash = 'C:\\Program Files\\Git\\bin\\bash.exe';
+      if (fs.existsSync(gitBash)) {
+        bashCmd = gitBash;
+      }
+      scriptPath = scriptPath.replace(/\\/g, '/');
+      envObj.HOME = '/tmp';
+      envObj.TMPDIR = '/tmp';
+    }
+    child = spawn(bashCmd, [scriptPath], {
+      env: envObj,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
   } else {
