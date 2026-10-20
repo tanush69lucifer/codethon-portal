@@ -19,9 +19,15 @@ const PUBLIC_CONTEST_FIELDS = 'title slug category instructions startAt endAt du
 
 // ---------- helpers ----------
 
+const contestCache = new Map(); // id -> { doc, exp }
 async function loadContest(contestId) {
+  const key = String(contestId);
+  const hit = contestCache.get(key);
+  if (hit && hit.exp > Date.now()) return hit.doc;
   const contest = await Contest.findById(contestId).lean();
   if (!contest || !contest.published) throw new ApiError(404, 'NOT_FOUND', 'Contest not found');
+  contestCache.set(key, { doc: contest, exp: Date.now() + 5000 });
+  if (contestCache.size > 200) contestCache.clear();
   return contest;
 }
 
@@ -376,6 +382,8 @@ router.get(
   })
 );
 
+const queuePosCache = new Map(); // subId -> { pos, exp }
+
 router.get(
   '/submissions/:submissionId',
   requireObjectId('submissionId'),
@@ -386,7 +394,15 @@ router.get(
     if (!sub) throw new ApiError(404, 'NOT_FOUND', 'Submission not found');
     let queuePosition = null;
     if (sub.status === 'QUEUED') {
-      queuePosition = (await Submission.countDocuments({ status: 'QUEUED', createdAt: { $lt: sub.createdAt } })) + 1;
+      const qKey = String(sub._id);
+      const cached = queuePosCache.get(qKey);
+      if (cached && cached.exp > Date.now()) {
+        queuePosition = cached.pos;
+      } else {
+        queuePosition = (await Submission.countDocuments({ status: 'QUEUED', createdAt: { $lt: sub.createdAt } })) + 1;
+        queuePosCache.set(qKey, { pos: queuePosition, exp: Date.now() + 1500 });
+        if (queuePosCache.size > 2000) queuePosCache.clear();
+      }
     }
     send(res, { ...sub, queuePosition });
   })
