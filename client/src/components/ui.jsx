@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import GenzisLoader from './GenzisLoader';
 
 // ---------- toasts ----------
 const ToastCtx = createContext(() => {});
@@ -53,8 +54,12 @@ export function Modal({ title, onClose, children, wide, footer }) {
   );
 }
 
-export function Loading({ label = 'Loading…' }) {
-  return <div className="card muted">{label}</div>;
+export function Loading({ label = 'Loading…', fullPage = false, animation = 'spin' }) {
+  return <GenzisLoader fullPage={fullPage} label={label} animation={animation} />;
+}
+
+export function PageLoader({ label = 'Loading…', animation = 'spin' }) {
+  return <GenzisLoader fullPage={true} label={label} animation={animation} />;
 }
 
 export function ErrorState({ error, onRetry }) {
@@ -115,3 +120,5 @@ export function Brand({ name }) {
     </div>
   );
 }
+
+export { GenzisLoader };

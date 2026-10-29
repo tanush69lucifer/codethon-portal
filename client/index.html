@@ -4,11 +4,103 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='monospace'%3E%7B%7D%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" href="/genzis-z-hd.png" />
     <title>Codethon Portal</title>
   </head>
   <body>
-    <div id="root" data-app="1"></div>
+    <div id="root" data-app="1">
+      <style>
+        #genzis-boot-loader {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          background: radial-gradient(circle at 50% 48%, #ff7626 0%, #ff6a1e 65%, #f25b0e 100%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          user-select: none;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .genzis-boot-card {
+          position: relative;
+          width: 340px;
+          aspect-ratio: 406 / 309;
+          background: #ff6a1e;
+          border-radius: 18px;
+          overflow: hidden;
+          box-shadow: 0 16px 36px -8px rgba(22, 10, 34, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+        }
+        .genzis-boot-base {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          pointer-events: none;
+        }
+        .genzis-boot-z {
+          position: absolute;
+          left: 55.9113%;
+          top: 43.0421%;
+          width: 11.3301%;
+          height: 14.8867%;
+          transform-origin: 50% 50%;
+          will-change: transform;
+          animation: genzisBootRotate 1.4s linear infinite;
+          pointer-events: none;
+          filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.4));
+        }
+        @keyframes genzisBootRotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .genzis-boot-progress {
+          margin-top: 18px;
+          width: 130px;
+          height: 4px;
+          background: rgba(22, 10, 34, 0.22);
+          border-radius: 999px;
+          overflow: hidden;
+          position: relative;
+        }
+        .genzis-boot-bar {
+          position: absolute;
+          top: 0;
+          left: -50%;
+          width: 50%;
+          height: 100%;
+          background: #160a22;
+          border-radius: 999px;
+          animation: genzisBootPulse 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes genzisBootPulse {
+          0% { left: -50%; width: 30%; }
+          50% { width: 65%; }
+          100% { left: 100%; width: 30%; }
+        }
+        .genzis-boot-label {
+          margin-top: 12px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: #160a22;
+          opacity: 0.9;
+          text-align: center;
+        }
+      </style>
+      <div id="genzis-boot-loader">
+        <div class="genzis-boot-card">
+          <img src="/genzis-base-hd.png" alt="GENZIS" class="genzis-boot-base" />
+          <img src="/genzis-z-hd.png" alt="Z" class="genzis-boot-z" />
+        </div>
+        <div class="genzis-boot-progress">
+          <div class="genzis-boot-bar"></div>
+        </div>
+        <div class="genzis-boot-label">Loading Portal…</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

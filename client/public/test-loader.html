@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Genzis Loader Preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0f1117;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 30px;
+    }
+
+    h1 {
+      font-size: 20px;
+      letter-spacing: 1px;
+      margin: 0 0 10px 0;
+      color: #ff8c42;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      max-width: 1000px;
+    }
+
+    .card {
+      background: #181a24;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* THE GENZIS LOADER WIDGET */
+    .genzis-loader {
+      position: relative;
+      width: 320px;
+      aspect-ratio: 406 / 309;
+      background: #ff6a1e;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px -8px rgba(255, 106, 30, 0.4);
+      user-select: none;
+    }
+
+    .genzis-base {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .genzis-z {
+      position: absolute;
+      left: 55.9113%;
+      top: 43.0421%;
+      width: 11.3301%;
+      height: 14.8867%;
+      transform-origin: center center;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    /* Animation 1: Smooth 360 Spin (Continuous & Linear) */
+    .spin-linear {
+      animation: genzisSpin 1.4s linear infinite;
+    }
+
+    /* Animation 2: Eased 360 Spin (Snappy tech feel) */
+    .spin-eased {
+      animation: genzisSpinEased 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    /* Animation 3: 3D Y-Axis Flip (Coin flip) */
+    .flip-3d {
+      animation: genzisFlip 1.8s ease-in-out infinite;
+    }
+
+    /* Animation 4: Gyroscope 3D Rotation (Ultra futuristic) */
+    .gyro-3d {
+      animation: genzisGyro 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes genzisSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes genzisSpinEased {
+      0% { transform: rotate(0deg); }
+      70% { transform: rotate(360deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes genzisFlip {
+      0% { transform: perspective(400px) rotateY(0deg); }
+      100% { transform: perspective(400px) rotateY(360deg); }
+    }
+
+    @keyframes genzisGyro {
+      0% { transform: perspective(400px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+      50% { transform: perspective(400px) rotateX(20deg) rotateY(180deg) rotateZ(10deg); }
+      100% { transform: perspective(400px) rotateX(0deg) rotateY(360deg) rotateZ(0deg); }
+    }
+
+    /* Full Page Screen Overlay Preview */
+    .fullpage-preview {
+      width: 100%;
+      max-width: 680px;
+      background: #ff6a1e;
+      border-radius: 20px;
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 25px 50px -12px rgba(255, 106, 30, 0.5);
+    }
+
+    .pulse-bar {
+      margin-top: 24px;
+      width: 160px;
+      height: 4px;
+      background: rgba(22, 10, 34, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .pulse-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: #160a22;
+      border-radius: 999px;
+      animation: pulseLoading 1.2s ease-in-out infinite;
+    }
+    @keyframes pulseLoading {
+      0% { left: -50%; width: 30%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 30%; }
+    }
+    .status-text {
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #160a22;
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Genzis Page Loader Preview</h1>
+
+  <div class="row">
+    <div class="card">
+      <div class="card-title">1. Perfect 360&deg; Spin (Linear)</div>
+      <div class="genzis-loader">
+        <img src="/genzis-base-hd.png" class="genzis-base" alt="Genzis Base" />
+        <img src="/genzis-z-hd.png" class="genzis-z spin-linear" alt="Z" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. Snappy Eased Spin</div>
+      <div class="genzis-loader">
+        <img src="/genzis-base-hd.png" class="genzis-base" alt="Genzis Base" />
+        <img src="/genzis-z-hd.png" class="genzis-z spin-eased" alt="Z" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. 3D Y-Axis Flip</div>
+      <div class="genzis-loader">
+        <img src="/genzis-base-hd.png" class="genzis-base" alt="Genzis Base" />
+        <img src="/genzis-z-hd.png" class="genzis-z flip-3d" alt="Z" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="width: 100%; max-width: 680px;">
+    <div class="card-title">Full Page Loader Experience</div>
+    <div class="fullpage-preview">
+      <div class="genzis-loader" style="width: 360px;">
+        <img src="/genzis-base-hd.png" class="genzis-base" alt="Genzis Base" />
+        <img src="/genzis-z-hd.png" class="genzis-z spin-linear" alt="Z" />
+      </div>
+      <div class="pulse-bar"></div>
+      <div class="status-text">Loading Portal...</div>
+    </div>
+  </div>
+
+</body>
+</html>

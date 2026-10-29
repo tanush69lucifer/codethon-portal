@@ -4,7 +4,7 @@ import { api } from '../../lib/api';
 import { fmtDate, fmtDuration, md } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import TopBar from '../../components/TopBar';
-import { ErrorState, Loading, StatusBadge, useAsync } from '../../components/ui';
+import { ErrorState, Loading, PageLoader, StatusBadge, useAsync } from '../../components/ui';
 
 export default function Lobby() {
   const { contestId } = useParams();
@@ -24,7 +24,7 @@ export default function Lobby() {
     return () => clearInterval(t);
   }, []);
 
-  if (loading) return <><TopBar /><main className="page"><Loading /></main></>;
+  if (loading) return <PageLoader label="Loading contest lobby…" />;
   if (error) return <><TopBar /><main className="page"><ErrorState error={error} onRetry={reload} /></main></>;
 
   const { contest, attempt, browser, counts, sebConfigUrl } = data;
