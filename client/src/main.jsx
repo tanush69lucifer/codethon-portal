@@ -4,7 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ToastProvider } from './components/ui';
 import { refreshSebKeys } from './lib/seb';
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import './styles.css';
+import './codezis.css';
 
 refreshSebKeys();
 
