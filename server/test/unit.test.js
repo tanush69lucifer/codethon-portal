@@ -16,10 +16,13 @@ const { sha256 } = require('../src/middleware/seb');
 test('checkers', () => {
   assert.ok(check('tokens', '1 2\n3\n', '1  2 3'));
   assert.ok(!check('tokens', '1 2 3', '1 2'));
+  assert.ok(check('tokens', '42', 'Enter number: 42'));
+  assert.ok(check('tokens', '10 20', 'Please enter two numbers:\nResult is: 10 20'));
   assert.ok(check('exact', 'a\nb\n', 'a  \nb'));
   assert.ok(!check('exact', 'a b', 'a  b'));
   assert.ok(check('float', '0.3333333', '0.33333331'));
   assert.ok(!check('float', '0.33', '0.34'));
+  assert.ok(check('float', '3.14159', 'Value of pi: 3.14159'));
 });
 
 test('plagiarism catches renamed copy, ignores different solution', () => {

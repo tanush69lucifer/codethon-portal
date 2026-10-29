@@ -17,15 +17,37 @@ const tokens = (s) => normNewlines(s).split(/\s+/).filter(Boolean);
 function tokenCompare(expected, actual) {
   const a = tokens(expected);
   const b = tokens(actual);
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
-  return true;
+  if (a.length === b.length) {
+    for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
+    return true;
+  }
+  // School-friendly prompt handling (ICSE / ISC):
+  // If student printed conversational prompts (e.g. "Enter N: ", "Result is: 42"),
+  // verify whether the expected answer tokens match the trailing tail tokens of the student's output.
+  if (b.length > a.length && a.length > 0) {
+    const tail = b.slice(b.length - a.length);
+    for (let i = 0; i < a.length; i += 1) {
+      if (a[i] !== tail[i]) return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 function floatCompare(expected, actual, eps = 1e-6) {
   const a = tokens(expected);
   const b = tokens(actual);
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length) {
+    if (b.length > a.length && a.length > 0) {
+      const tail = b.slice(b.length - a.length);
+      return compareFloats(a, tail, eps);
+    }
+    return false;
+  }
+  return compareFloats(a, b, eps);
+}
+
+function compareFloats(a, b, eps) {
   for (let i = 0; i < a.length; i += 1) {
     if (a[i] === b[i]) continue;
     const x = Number(a[i]);

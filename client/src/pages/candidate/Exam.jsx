@@ -164,10 +164,22 @@ export default function Exam() {
   const proctoring = paper?.contest.proctoring;
   const isSeb = isSebUserAgent();
   const needFullscreen = Boolean(proctoring?.requireFullscreen && !isSeb && document.fullscreenEnabled);
+  const [windowFocused, setWindowFocused] = useState(true);
   useEffect(() => {
     const onFs = () => setFullscreen(Boolean(document.fullscreenElement));
+    const onFocus = () => setWindowFocused(true);
+    const onBlur = () => setWindowFocused(false);
+    const onVis = () => setWindowFocused(!document.hidden && document.hasFocus());
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
+    document.addEventListener('visibilitychange', onVis);
     document.addEventListener('fullscreenchange', onFs);
-    return () => document.removeEventListener('fullscreenchange', onFs);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFs);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, []);
 
   const onServer = useCallback(
@@ -264,7 +276,9 @@ export default function Exam() {
   if (!paper) return <PageLoader label="Loading your paper…" />;
 
   const lockAt = proctoring?.lockAfterViolations || 0;
-  const blocked = needFullscreen && !fullscreen;
+  const notInFullscreen = needFullscreen && !fullscreen;
+  const focusLost = !isSeb && !windowFocused;
+  const blocked = notInFullscreen || focusLost;
   // Purely visual: share of the attempt window still left (for the timer bar).
   const startedAt = paper.attempt?.startedAt ? new Date(paper.attempt.startedAt).getTime() : 0;
   const totalMs = startedAt && deadline > startedAt ? deadline - startedAt : 0;
@@ -368,11 +382,23 @@ export default function Exam() {
         <div className="gate">
           <div className="cz-gate-card">
             <span className="cz-icon-ring"><IconMaximize size={26} /></span>
-            <h2>Return to fullscreen</h2>
-            <p>The test must stay in fullscreen. Leaving fullscreen is recorded as a violation.</p>
-            <button className="btn primary lg" onClick={() => document.documentElement.requestFullscreen().catch(() => {})}>
-              <IconMaximize size={16} /> Go fullscreen
-            </button>
+            <h2>{notInFullscreen ? 'Return to fullscreen' : '⚠️ Exam Suspended: Focus Lost'}</h2>
+            <p>
+              {notInFullscreen
+                ? 'The test must stay in fullscreen. Leaving fullscreen is recorded as a violation.'
+                : 'You switched windows, opened a screenshot/overlay tool, or clicked outside the exam. Click below to resume.'}
+            </p>
+            <button
+              className="btn primary lg"
+              onClick={() => {
+                window.focus();
+                setWindowFocused(true);
+                if (notInFullscreen) {
+                  document.documentElement.requestFullscreen().catch(() => {});
+                }
+              }}
+            >
+              <IconMaximize size={16} /> {notInFullscreen ? 'Go fullscreen' : 'Resume exam'}            </button>
           </div>
         </div>
       )}

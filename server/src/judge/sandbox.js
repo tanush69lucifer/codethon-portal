@@ -63,12 +63,14 @@ function dockerArgs(name, env, memoryMb) {
     '--cpus', '1',
     '--memory', `${containerMem}m`,
     '--memory-swap', `${containerMem}m`,
-    '--pids-limit', '160',
+    '--pids-limit', '64',
     '--read-only',
-    '--tmpfs', '/tmp:rw,nosuid,size=256m',
+    '--tmpfs', '/tmp:rw,nosuid,nodev,size=128m',
     '--cap-drop', 'ALL',
     '--security-opt', 'no-new-privileges',
     '--ulimit', 'nofile=256:256',
+    '--ulimit', 'nproc=64:64',
+    '--ulimit', 'fsize=10485760',
     '--log-driver', 'none',
   ];
   for (const [k, v] of Object.entries(env)) args.push('-e', `${k}=${v}`);

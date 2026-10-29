@@ -31,14 +31,17 @@ else
   for i in $(seq 1 "$N"); do
     s=$(date +%s%N)
     (
-      ulimit -f "$OUTKB"
-      exec timeout -s KILL "$TL" java -Xmx"${MEM}m" -Xss64m -XX:+UseSerialGC -XX:-UsePerfData \
-        -Dfile.encoding=UTF-8 -cp classes "$CLS" < "tests/$i.in" > "out/$i.out" 2> "out/$i.err"
+      ulimit -f "$OUTKB" 2>/dev/null || true
+      ulimit -u 64 2>/dev/null || true
+      exec timeout -s KILL "$TL" java -Xmx"${MEM}m" -Xms16m -Xss32m -XX:+UseSerialGC -XX:-UsePerfData \
+        -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djdk.net.hosts.file=/dev/null \
+        -cp classes "$CLS" < "tests/$i.in" > "out/$i.out" 2> "out/$i.err"
     )
     code=$?
     e=$(date +%s%N)
     wall_ms=$(( (e - s) / 1000000 ))
     echo "$i $code $wall_ms" >> out/results.txt
+    truncate -s '<65536' "out/$i.out" 2>/dev/null || true
     truncate -s '<16384' "out/$i.err" 2>/dev/null || true
 
     if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then

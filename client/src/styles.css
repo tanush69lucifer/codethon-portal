@@ -248,9 +248,27 @@ tr.clickable:hover td { background: #fafbff; }
 .testpill.bad { background: var(--bad-soft); color: var(--bad); }
 .testpill.warn { background: var(--warn-soft); color: var(--warn); }
 
-.gate { position: fixed; inset: 0; z-index: 40; background: rgba(15, 18, 30, 0.92); color: #fff; display: grid; place-items: center; padding: 24px; text-align: center; }
-.gate .card { color: var(--text); max-width: 460px; }
-.blur-content { filter: blur(8px); pointer-events: none; }
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(10, 12, 20, 0.96);
+  backdrop-filter: blur(25px);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  user-select: none;
+}
+.gate .card { color: var(--text); max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+.blur-content {
+  filter: blur(45px) brightness(0.12) grayscale(1);
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: filter 0.04s ease-out;
+}
 
 @media (max-width: 900px) {
   .exam-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }

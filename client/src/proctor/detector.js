@@ -109,8 +109,9 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
       const blocked =
         k === 'f12' ||
         k === 'printscreen' ||
-        (mod && e.shiftKey && ['i', 'j', 'c', 'k'].includes(k)) ||
-        (mod && ['u', 'p', 's'].includes(k));
+        (mod && e.shiftKey && ['i', 'j', 'c', 'k', 's'].includes(k)) ||
+        (mod && ['u', 'p', 's'].includes(k)) ||
+        (mod && k === 'a' && !e.target?.closest?.('.monaco-editor'));
       if (blocked) {
         e.preventDefault();
         e.stopPropagation();
@@ -141,6 +142,17 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
       (c) => c !== document.body && c !== document.head && !isAppNode(c)
     );
     const candidates = roots.flatMap((r) => [r, ...r.querySelectorAll('*')]);
+    const killNode = (target) => {
+      try {
+        target.remove();
+      } catch {
+        try {
+          target.style.setProperty('display', 'none', 'important');
+          target.style.setProperty('visibility', 'hidden', 'important');
+          target.style.setProperty('pointer-events', 'none', 'important');
+        } catch {}
+      }
+    };
     let checked = 0;
     for (const el of candidates) {
       if (checked++ > 3000) break;
@@ -149,6 +161,7 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
         const src = el.getAttribute('src') || '';
         if (/^(chrome|moz|safari-web)-extension:\/\//.test(src)) {
           once(`iframe:${shortHash(src)}`, 'EXTENSION_IFRAME', { scheme: src.split(':')[0] });
+          killNode(el);
         }
       }
       if (el.shadowRoot) once(`shadow:${el.tagName}:${shortHash(el.id + el.className)}`, 'FOREIGN_SHADOW_ROOT', { tag: el.tagName.slice(0, 20) });
@@ -164,6 +177,7 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
               z,
               areaPct: Math.round(area * 100),
             });
+            killNode(el);
           }
         }
       } catch {
@@ -182,6 +196,7 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
           const hit = document.querySelector(sel);
           if (hit && !isAppNode(hit)) {
             once(`fp:${fp.tool}`, 'KNOWN_FINGERPRINT', { tool: fp.tool });
+            killNode(hit);
             break;
           }
         } catch {
