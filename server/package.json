@@ -16,7 +16,9 @@
     "create-admin": "node scripts/createAdmin.js",
     "test": "node --test test/unit.test.js",
     "smoke": "node scripts/smoke.js",
-    "loadtest": "node scripts/loadtest.js"
+    "loadtest": "node scripts/loadtest.js",
+    "reset-candidate": "node scripts/reset-attempt.js",
+    "reset-all": "node scripts/reset-all.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

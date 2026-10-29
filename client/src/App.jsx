@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { auth } from './lib/api';
-import { Loading, useToast } from './components/ui';
+import { PageLoader, useToast } from './components/ui';
 import Login from './pages/Login';
 import CandidateHome from './pages/candidate/CandidateHome';
 import Lobby from './pages/candidate/Lobby';
@@ -41,7 +41,7 @@ export default function App() {
   const home = !user ? '/login' : user.role === 'ADMIN' ? '/admin' : '/home';
 
   return (
-    <Suspense fallback={<div className="page"><Loading /></div>}>
+    <Suspense fallback={<PageLoader label="Loading page…" />}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to={home} replace /> : <Login />} />
         <Route path="/home" element={<Guard role="CANDIDATE"><CandidateHome /></Guard>} />

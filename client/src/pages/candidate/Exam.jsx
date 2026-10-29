@@ -4,7 +4,7 @@ import { api } from '../../lib/api';
 import { fmtDuration } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import { useProctor } from '../../proctor/useProctor';
-import { Brand, ErrorState, Loading, Modal, useToast } from '../../components/ui';
+import { Brand, ErrorState, Loading, PageLoader, Modal, useToast } from '../../components/ui';
 import McqSection from './McqSection';
 import CodingSection from './CodingSection';
 
@@ -244,7 +244,7 @@ export default function Exam() {
     );
   }
   if (loadError) return <div className="page"><ErrorState error={loadError} onRetry={load} /></div>;
-  if (!paper) return <div className="page"><Loading label="Loading your paper…" /></div>;
+  if (!paper) return <PageLoader label="Loading your paper…" />;
 
   const lockAt = proctoring?.lockAfterViolations || 0;
   const blocked = needFullscreen && !fullscreen;
