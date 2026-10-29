@@ -112,11 +112,47 @@ export function useAsync(fn, deps = []) {
   return { ...state, reload, setData: (data) => setState((s) => ({ ...s, data })) };
 }
 
-export function Brand({ name }) {
+/**
+ * Genzis cube mark (from the "Combo" logo): three rhombus faces in violet,
+ * pink and orange. `mono` renders a single-colour version.
+ */
+export function CubeMark({ size = 28, mono, gap = '#120a1f', className = '' }) {
+  const face = 'M0,-130 L112.6,-65 L0,0 L-112.6,-65 Z M0,-97.5 L56.3,-65 L0,-32.5 L-56.3,-65 Z';
+  const fills = mono ? [mono, mono, mono] : ['#7B2FF7', '#E0479E', '#FF8A3D'];
+  return (
+    <svg className={`brand-cube ${className}`} width={size} height={size} viewBox="-140 -140 280 280" aria-hidden="true" focusable="false">
+      <g stroke={gap} strokeWidth="10" strokeLinejoin="round">
+        {fills.map((f, i) => (
+          <path key={i} d={face} fill={f} fillRule="evenodd" transform={`rotate(${i * 120})`} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/** Wordmark text: CODE<Z>IS with the brand-orange Z. */
+export function Wordmark({ text = 'CODEZIS' }) {
+  const i = text.toUpperCase().lastIndexOf('Z');
+  if (i < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, i)}
+      <span className="z">{text[i]}</span>
+      {text.slice(i + 1)}
+    </>
+  );
+}
+
+export function Brand({ name, sub = 'by Genzis', size = 30 }) {
   return (
     <div className="brand">
-      <span className="brand-mark">{'{}'}</span>
-      <span>{name || 'Codethon Portal'}</span>
+      <CubeMark size={size} gap="var(--bg, #120a1f)" />
+      <span className="brand-text">
+        <span className="brand-word">
+          <Wordmark text={name || 'CODEZIS'} />
+        </span>
+        {sub && <span className="brand-sub">{sub}</span>}
+      </span>
     </div>
   );
 }

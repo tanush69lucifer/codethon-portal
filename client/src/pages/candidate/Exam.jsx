@@ -5,6 +5,7 @@ import { fmtDuration } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import { useProctor } from '../../proctor/useProctor';
 import { Brand, ErrorState, Loading, PageLoader, Modal, useToast } from '../../components/ui';
+import { IconAlert, IconArrowRight, IconClock, IconLock, IconMaximize, IconSave, IconShield, IconX } from '../../components/icons';
 import McqSection from './McqSection';
 import CodingSection from './CodingSection';
 
@@ -224,43 +225,68 @@ export default function Exam() {
 
   // ---------- render ----------
   if (ended) {
+    const locked = ended.status === 'LOCKED';
     return (
-      <div className="auth-shell">
-        <div className="card stack" style={{ maxWidth: 520, textAlign: 'center' }}>
-          <h1>{ended.status === 'LOCKED' ? 'Attempt locked' : 'Test submitted'}</h1>
-          <p className="muted">{ended.reason || (ended.status === 'LOCKED' ? 'Contact the organisers.' : 'Thank you! Results will be announced by the organisers.')}</p>
-          {ended.status === 'LOCKED' && (
-            <button className="btn" onClick={() => navigate(`/contest/${contestId}`, { replace: true })}>
+      <div className="cz cz-end">
+        <div className="cz-grid-bg" />
+        <div className="cz-glow a" style={locked ? { background: '#ff5c6c' } : undefined} />
+        <div className="cz-end-card">
+          {locked ? (
+            <span className="cz-icon-ring bad" style={{ width: 84, height: 84 }}>
+              <IconLock size={34} />
+            </span>
+          ) : (
+            <svg className="cz-check" viewBox="0 0 84 84" fill="none" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="42" cy="42" r="38" />
+              <path d="M27 43l10 10 20-22" />
+            </svg>
+          )}
+          <h1>{locked ? 'Attempt locked' : 'Test submitted'}</h1>
+          <p>{ended.reason || (locked ? 'Contact the organisers.' : 'Thank you! Results will be announced by the organisers.')}</p>
+          {locked && (
+            <button className="btn lg" onClick={() => navigate(`/contest/${contestId}`, { replace: true })}>
               Check status
             </button>
           )}
-          {ended.status !== 'LOCKED' && (
-            <button className="btn primary" onClick={() => navigate('/home', { replace: true })}>
-              Back to dashboard
+          {!locked && (
+            <button className="btn primary lg" onClick={() => navigate('/home', { replace: true })}>
+              Back to dashboard <IconArrowRight size={16} />
             </button>
           )}
+          <div className="cz-end-foot">
+            <Brand sub="powered by Genzis" size={26} />
+          </div>
         </div>
       </div>
     );
   }
-  if (loadError) return <div className="page"><ErrorState error={loadError} onRetry={load} /></div>;
+  if (loadError) return <div className="cz"><div className="page"><ErrorState error={loadError} onRetry={load} /></div></div>;
   if (!paper) return <PageLoader label="Loading your paper…" />;
 
   const lockAt = proctoring?.lockAfterViolations || 0;
   const blocked = needFullscreen && !fullscreen;
+  // Purely visual: share of the attempt window still left (for the timer bar).
+  const startedAt = paper.attempt?.startedAt ? new Date(paper.attempt.startedAt).getTime() : 0;
+  const totalMs = startedAt && deadline > startedAt ? deadline - startedAt : 0;
+  const timePct = totalMs ? Math.max(0, Math.min(100, (remaining / totalMs) * 100)) : 0;
+  const low = remaining < 5 * 60_000;
+  const crit = remaining < 60_000;
 
   return (
-    <div className="exam">
+    <div className="cz exam">
       <header className="exam-top">
-        <Brand />
-        <span className="muted small grow" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <Brand size={28} />
+        <span className="exam-divider" />
+        <span className="exam-title grow" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {paper.contest.title}
         </span>
-        <span className={`badge ${violations ? 'warn' : 'ok'}`} title="Integrity monitoring is active">
-          <span className="dot" /> Monitoring{violations ? ` · ${violations}${lockAt ? `/${lockAt}` : ''} warnings` : ''}
+        <span className={`cz-monitor ${violations ? 'warn' : ''}`} title="Integrity monitoring is active">
+          <span className={`cz-live ${violations ? 'warn' : ''}`} /> Monitoring{violations ? ` · ${violations}${lockAt ? `/${lockAt}` : ''} warnings` : ''}
         </span>
-        <span className={`timer num ${remaining < 5 * 60_000 ? 'low' : ''}`} aria-label="Time left">
+        <span className={`cz-timer ${low ? 'low' : ''} ${crit ? 'crit' : ''}`} aria-label="Time left" role="timer">
+          <IconClock size={16} />
           {fmtDuration(remaining)}
+          {totalMs > 0 && <span className="track" style={{ width: `${timePct}%` }} />}
         </span>
         <button className="btn primary" onClick={() => setConfirmFinish(true)} disabled={finishing}>
           Finish test
@@ -271,14 +297,23 @@ export default function Exam() {
         <nav className="exam-nav">
           <div className="nav-sep">Section A</div>
           <button className={`nav-item ${section === 'mcq' ? 'active' : ''}`} onClick={() => setSection('mcq')}>
-            <span>MCQs</span>
+            <span className="nav-main">
+              <span className="nav-letter mcq">Q</span>
+              <span className="nav-label">MCQs</span>
+            </span>
             <span className="badge">{answeredCount}/{mcqs.length}</span>
           </button>
+          {mcqs.length > 0 && (
+            <div className="nav-progress" aria-hidden="true">
+              <div style={{ width: `${(answeredCount / mcqs.length) * 100}%` }} />
+            </div>
+          )}
           <div className="nav-sep">Section B · Java</div>
           {problems.map((p, i) => (
-            <button key={p._id} className={`nav-item ${section === p._id ? 'active' : ''}`} onClick={() => setSection(p._id)}>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {String.fromCharCode(65 + i)}. {p.title}
+            <button key={p._id} className={`nav-item ${section === p._id ? 'active' : ''}`} onClick={() => setSection(p._id)} title={p.title}>
+              <span className="nav-main">
+                <span className="nav-letter">{String.fromCharCode(65 + i)}</span>
+                <span className="nav-label">{p.title}</span>
               </span>
               {best[p._id] ? (
                 <span className={`badge ${best[p._id].score >= best[p._id].max ? 'ok' : 'warn'}`}>{best[p._id].score}</span>
@@ -287,12 +322,19 @@ export default function Exam() {
               )}
             </button>
           ))}
+          <div className="nav-foot">
+            <div><IconSave size={13} /> Progress auto-saves</div>
+            <div><IconShield size={13} /> Secure session active</div>
+          </div>
         </nav>
         <main className="exam-main">
           {warning && (
-            <div className="warn-box row between" style={{ margin: 12 }}>
-              <span>{warning}</span>
-              <button className="btn sm" onClick={() => setWarning(null)}>OK</button>
+            <div className="cz-warn-banner" role="alert">
+              <IconAlert size={18} />
+              <span className="grow">{warning}</span>
+              <button className="btn sm ghost" onClick={() => setWarning(null)} aria-label="Dismiss warning">
+                <IconX size={14} /> OK
+              </button>
             </div>
           )}
           {section === 'mcq' ? (
@@ -324,11 +366,12 @@ export default function Exam() {
 
       {blocked && (
         <div className="gate">
-          <div className="card stack">
+          <div className="cz-gate-card">
+            <span className="cz-icon-ring"><IconMaximize size={26} /></span>
             <h2>Return to fullscreen</h2>
-            <p className="muted">The test must stay in fullscreen. Leaving fullscreen is recorded as a violation.</p>
-            <button className="btn primary" onClick={() => document.documentElement.requestFullscreen().catch(() => {})}>
-              Go fullscreen
+            <p>The test must stay in fullscreen. Leaving fullscreen is recorded as a violation.</p>
+            <button className="btn primary lg" onClick={() => document.documentElement.requestFullscreen().catch(() => {})}>
+              <IconMaximize size={16} /> Go fullscreen
             </button>
           </div>
         </div>
@@ -347,12 +390,23 @@ export default function Exam() {
             </>
           }
         >
-          <div className="stack">
-            <div>MCQs answered: <b>{answeredCount}</b> / {mcqs.length}</div>
-            <div>
-              Coding problems with a submission: <b>{Object.keys(best).filter((k) => problems.some((p) => p._id === k)).length}</b> / {problems.length}
+          <div className="stack" style={{ gap: 14 }}>
+            <div className="cz-summary">
+              <div>
+                <div className="k">MCQs answered</div>
+                <div className="v">{answeredCount} <small>/ {mcqs.length}</small></div>
+              </div>
+              <div>
+                <div className="k">Problems submitted</div>
+                <div className="v">
+                  {Object.keys(best).filter((k) => problems.some((p) => p._id === k)).length} <small>/ {problems.length}</small>
+                </div>
+              </div>
             </div>
-            <div className="warn-box">You cannot come back after submitting. Code that you only ran (not submitted) is not scored.</div>
+            <div className="warn-box row" style={{ gap: 10, alignItems: 'flex-start', flexWrap: 'nowrap' }}>
+              <IconAlert size={16} style={{ flex: 'none', marginTop: 2 }} />
+              <span>You cannot come back after submitting. Code that you only ran (not submitted) is not scored.</span>
+            </div>
           </div>
         </Modal>
       )}
