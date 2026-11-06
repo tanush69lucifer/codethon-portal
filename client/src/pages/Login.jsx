@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, auth } from '../lib/api';
-import { Brand, CubeMark, Wordmark } from '../components/ui';
+import { Brand } from '../components/ui';
+import { IrField, LOGO_SRC, Pixels, Ribbon, SpectrumDefs } from '../components/Spectrum';
+import { zixMood, zixSay } from '../components/Zix';
 import { IconArrowRight, IconInfo, IconKey, IconLock, IconMail, IconSave, IconShield, IconUser, IconCode } from '../components/icons';
 
 export default function Login() {
@@ -23,6 +25,7 @@ export default function Login() {
       navigate(data.user.role === 'ADMIN' ? '/admin' : '/home', { replace: true });
     } catch (err) {
       setError(err.message);
+      zixSay('That did not match. Check the email and code from the organisers.', 'worry', 2200);
     } finally {
       setBusy(false);
     }
@@ -31,31 +34,27 @@ export default function Login() {
   const isAdmin = mode === 'admin';
 
   return (
-    <div className="cz cz-auth">
+    <div className="cz cz-auth cz-spectrum">
       {/* ---------- brand panel ---------- */}
       <aside className="cz-auth-art" aria-hidden="true">
+        <SpectrumDefs />
+        <IrField />
+        <div className="cz-veil" />
         <div className="cz-grid-bg" />
-        <div className="cz-glow a" />
-        <div className="cz-glow b" />
-        <CubeMark size={420} className="cz-cube-deco" gap="#120a1f" />
+        <Ribbon />
+        <Pixels />
 
         <div className="cz-presents">
-          <CubeMark size={30} />
-          <span>
-            <b>
-              <Wordmark text="GENZIS" />
-            </b>{' '}
-            presents
-          </span>
+          <img src={LOGO_SRC} alt="" className="cz-logo" />
+          <span>presents</span>
         </div>
 
         <div>
           <span className="cz-eyebrow">
             <span className="cz-live" style={{ color: 'var(--primary)' }} /> Solo Codeathon · Java
           </span>
-          <h1 className="cz-wordmark">
-            <Wordmark text="CODEZIS" />
-          </h1>
+          <h1 className="cz-wordmark cz-word">CODEZIS</h1>
+          <div className="cz-under" />
           <p className="cz-tagline">
             <b>Think it. Code it. Submit it.</b> One seat, one timer, and your best logic against the judge.
           </p>
@@ -133,6 +132,8 @@ export default function Login() {
                 required
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
+                onFocus={() => zixSay(isAdmin ? 'Eyes closed. Type away.' : 'Not peeking. Promise.', 'shy', 600000)}
+                onBlur={() => zixMood(null)}
                 placeholder={isAdmin ? '••••••••' : 'K7PM2QXR'}
               />
             </span>
@@ -161,9 +162,7 @@ export default function Login() {
 
           <div className="cz-powered">
             <span>Powered by</span>
-            <b>
-              <Wordmark text="GENZIS" />
-            </b>
+            <img src={LOGO_SRC} alt="Genzis" className="cz-logo sm" />
             <span>· Generations Ahead</span>
           </div>
         </form>

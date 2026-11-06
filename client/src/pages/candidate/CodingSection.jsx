@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../lib/api';
 import { md, VERDICT_LABEL, verdictTone, fmtDate } from '../../lib/format';
 import { useToast } from '../../components/ui';
+import { zixConfetti, zixSay } from '../../components/Zix';
 import { IconAlert, IconCheck, IconClock, IconCpu, IconJava, IconPlay, IconReset, IconSend, IconTerminal, IconTrophy, IconX } from '../../components/icons';
 
 const CodeEditor = lazy(() => import('../../components/CodeEditor'));
@@ -167,12 +168,19 @@ export default function CodingSection({ contestId, problem, initialCode, best, e
     if (!code.trim()) return toast('Write some code first', 'bad');
     setBusy(true);
     setResult({ pending: true });
+    zixSay(kind === 'RUN' ? 'Running your samples… eyes on the terminal.' : 'Compiling… watch the terminal, not me.', 'worry', 60000);
     try {
       const path = `/c/contests/${contestId}/problems/${problem._id}/${kind === 'RUN' ? 'run' : 'submit'}`;
       const body = kind === 'RUN' ? { code, input: customOn ? customInput : null } : { code };
       const { submissionId } = await api('POST', path, body);
       const s = await pollSubmission(submissionId, (x) => x.status === 'QUEUED' && setResult({ pending: true, queuePosition: x.queuePosition }));
       setResult(s);
+      if (s.verdict === 'AC' && kind === 'SUBMIT') {
+        zixSay(`ACCEPTED! ${s.passed ?? ''}${s.passed != null && s.total != null ? ` for ${s.total}` : ''}`.trim(), 'party', 2600);
+        zixConfetti(22);
+      } else if (s.verdict === 'AC' || s.verdict === 'OK') zixSay('Samples pass. Submit when ready.', 'happy', 1600);
+      else if (s.verdict === 'CE') zixSay('Compile error. Check the line in the console.', 'think', 2200);
+      else zixSay('Not quite. Compare your output with the expected one.', 'think', 2200);
       if (kind === 'SUBMIT') {
         loadHistory();
         if (s.status === 'DONE') onBest(problem._id, s.score, s.maxScore);
@@ -180,6 +188,7 @@ export default function CodingSection({ contestId, problem, initialCode, best, e
       }
     } catch (err) {
       setResult({ error: err.message });
+      zixSay('Something went wrong reaching the judge. Try again.', 'worry', 2200);
     } finally {
       setBusy(false);
     }

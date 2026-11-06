@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { api, auth } from '../../lib/api';
 import { fmtDate } from '../../lib/format';
 import TopBar from '../../components/TopBar';
+import { IrField, SpectrumDefs } from '../../components/Spectrum';
 import { ErrorState, Loading, StatusBadge, useAsync } from '../../components/ui';
 import { IconArrowRight, IconCheckCircle, IconInbox } from '../../components/icons';
 
@@ -10,10 +11,12 @@ export default function CandidateHome() {
   const first = (auth.user?.name || '').trim().split(/\s+/)[0];
 
   return (
-    <div className="cz">
-      <TopBar />
+    <div className="cz cz-spectrum">
+      <TopBar spectrum />
       <main className="page stack" style={{ gap: 22 }}>
         <section className="cz-hero cz-rise">
+          <SpectrumDefs />
+          <IrField />
           <div className="cz-grid-bg" />
           <div className="kicker">
             <span className="cz-live" style={{ color: 'var(--primary)' }} /> Participant dashboard

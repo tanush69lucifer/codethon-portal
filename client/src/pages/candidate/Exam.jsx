@@ -4,8 +4,10 @@ import { api } from '../../lib/api';
 import { fmtDuration } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import { useProctor } from '../../proctor/useProctor';
-import { Brand, ErrorState, Loading, PageLoader, Modal, useToast } from '../../components/ui';
+import { ErrorState, Loading, PageLoader, Modal, useToast } from '../../components/ui';
 import { IconAlert, IconArrowRight, IconClock, IconLock, IconMaximize, IconSave, IconShield, IconX } from '../../components/icons';
+import { CrtDecor, IrField, RisoDecor, SpectrumBrand, SpectrumDefs } from '../../components/Spectrum';
+import { zixConfetti, zixSay } from '../../components/Zix';
 import McqSection from './McqSection';
 import CodingSection from './CodingSection';
 
@@ -142,8 +144,17 @@ export default function Exam() {
     setReview((r) => {
       const next = { ...r, [qid]: !r[qid] };
       lsSet(reviewKey, next);
+      zixSay(next[qid] ? 'Flagged. Come back to it later.' : 'Unflagged.', null);
       return next;
     });
+
+  // Answer + a reaction from Zix.
+  const PICK_LINES = ['Locked in.', 'Bold pick.', 'Nice. Next one?', 'Confident. I like it.'];
+  const onAnswer = (qid, choice) => {
+    saveAnswer(qid, choice);
+    if (choice === null) zixSay('Cleared. Take another look.', 'think', 1100);
+    else zixSay(PICK_LINES[Math.floor(Math.random() * PICK_LINES.length)], 'happy', 1100);
+  };
 
   // ---------- code drafts ----------
   const onDraft = useCallback(
@@ -207,7 +218,10 @@ export default function Exam() {
       KNOWN_FINGERPRINT: 'An assistant extension was detected on this page. Disable it.',
       OVERLAY_NODE: 'Something is drawing over the test page. Close other tools and extensions.',
     }[sig.code];
-    if (msg) setWarning(msg);
+    if (msg) {
+      setWarning(msg);
+      zixSay('Careful, that was logged.', 'worry', 2200);
+    }
   }, []);
 
   const active = Boolean(paper) && !ended;
@@ -230,6 +244,33 @@ export default function Exam() {
     return () => window.removeEventListener('beforeunload', beforeUnload);
   }, [active]);
 
+  useEffect(() => {
+    if (!paper) return;
+    if (section === 'mcq') zixSay('Paper mode. Pick an answer, flag the tricky ones.', null);
+    else zixSay('Terminal on. Read the constraints before you type.', 'think', 2200);
+  }, [section, paper]);
+
+  const lowWarned = useRef(false);
+  useEffect(() => {
+    if (paper && deadline && !ended && remaining > 0 && remaining < 5 * 60_000 && !lowWarned.current) {
+      lowWarned.current = true;
+      zixSay('Five minutes left. Submit what you have.', 'worry', 2600);
+    }
+  }, [remaining, paper, deadline, ended]);
+
+  useEffect(() => {
+    if (!ended) return undefined;
+    if (ended.status === 'LOCKED') {
+      zixSay('Your attempt was locked. Talk to the organisers.', 'worry', 3000);
+      return undefined;
+    }
+    const id = setTimeout(() => {
+      zixSay('GG! See you on the leaderboard.', 'party', 3600);
+      zixConfetti(28);
+    }, 600);
+    return () => clearTimeout(id);
+  }, [ended]);
+
   const problems = paper?.problems || [];
   const mcqs = paper?.mcqs || [];
   const answeredCount = Object.keys(answers).length;
@@ -239,21 +280,29 @@ export default function Exam() {
   if (ended) {
     const locked = ended.status === 'LOCKED';
     return (
-      <div className="cz cz-end">
+      <div className="cz cz-end cz-spectrum">
+        <SpectrumDefs />
+        <IrField style={locked ? { filter: 'grayscale(.6) blur(30px)' } : undefined} />
         <div className="cz-grid-bg" />
-        <div className="cz-glow a" style={locked ? { background: '#ff5c6c' } : undefined} />
         <div className="cz-end-card">
           {locked ? (
             <span className="cz-icon-ring bad" style={{ width: 84, height: 84 }}>
               <IconLock size={34} />
             </span>
           ) : (
-            <svg className="cz-check" viewBox="0 0 84 84" fill="none" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="42" cy="42" r="38" />
-              <path d="M27 43l10 10 20-22" />
+            <svg className="cz-check spectrum" viewBox="0 0 96 96" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <defs>
+                <linearGradient id="czcg" x1="0" x2="1">
+                  <stop offset="0" stopColor="#FFC83D" />
+                  <stop offset=".5" stopColor="#FF3FA4" />
+                  <stop offset="1" stopColor="#9D6BFF" />
+                </linearGradient>
+              </defs>
+              <circle cx="48" cy="48" r="44" stroke="url(#czcg)" strokeWidth="4" />
+              <path d="M30 49l12 12 24-26" stroke="url(#czcg)" strokeWidth="6" />
             </svg>
           )}
-          <h1>{locked ? 'Attempt locked' : 'Test submitted'}</h1>
+          <h1>{locked ? 'Attempt locked' : 'Submitted.'}</h1>
           <p>{ended.reason || (locked ? 'Contact the organisers.' : 'Thank you! Results will be announced by the organisers.')}</p>
           {locked && (
             <button className="btn lg" onClick={() => navigate(`/contest/${contestId}`, { replace: true })}>
@@ -266,7 +315,7 @@ export default function Exam() {
             </button>
           )}
           <div className="cz-end-foot">
-            <Brand sub="powered by Genzis" size={26} />
+            <SpectrumBrand sub="powered by Genzis" />
           </div>
         </div>
       </div>
@@ -287,9 +336,10 @@ export default function Exam() {
   const crit = remaining < 60_000;
 
   return (
-    <div className="cz exam">
+    <div className="cz exam cz-spectrum">
+      <SpectrumDefs />
       <header className="exam-top">
-        <Brand size={28} />
+        <SpectrumBrand />
         <span className="exam-divider" />
         <span className="exam-title grow" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {paper.contest.title}
@@ -308,7 +358,7 @@ export default function Exam() {
       </header>
 
       <div className={`exam-body ${blocked ? 'blur-content' : ''}`}>
-        <nav className="exam-nav">
+        <nav className={`exam-nav ${section === 'mcq' ? 'on-mcq' : 'on-code'}`}>
           <div className="nav-sep">Section A</div>
           <button className={`nav-item ${section === 'mcq' ? 'active' : ''}`} onClick={() => setSection('mcq')}>
             <span className="nav-main">
@@ -352,18 +402,23 @@ export default function Exam() {
             </div>
           )}
           {section === 'mcq' ? (
-            <McqSection
+            <div className="cz-riso" key="riso">
+              <RisoDecor />
+              <McqSection
               mcqs={mcqs}
               answers={answers}
               review={review}
               index={mcqIndex}
               setIndex={setMcqIndex}
-              onAnswer={saveAnswer}
+              onAnswer={onAnswer}
               onToggleReview={toggleReview}
               negative={paper.contest.mcq?.negative}
-            />
+              />
+            </div>
           ) : currentProblem ? (
-            <CodingSection
+            <div className="cz-crt" key={`crt-${currentProblem._id}`}>
+              <CrtDecor />
+              <CodingSection
               key={currentProblem._id}
               contestId={contestId}
               problem={currentProblem}
@@ -373,7 +428,8 @@ export default function Exam() {
               onDraft={onDraft}
               onBest={onBest}
               disabled={finishing}
-            />
+              />
+            </div>
           ) : null}
         </main>
       </div>
