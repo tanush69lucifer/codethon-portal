@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { api, auth } from '../lib/api';
 import { Brand } from './ui';
+import { SpectrumBrand } from './Spectrum';
 import { IconLogout } from './icons';
 
 const initials = (name = '') =>
@@ -11,7 +12,7 @@ const initials = (name = '') =>
     .map((w) => w[0]?.toUpperCase() || '')
     .join('') || '?';
 
-export default function TopBar({ children }) {
+export default function TopBar({ children, spectrum = false }) {
   const navigate = useNavigate();
   const logout = async () => {
     try {
@@ -25,7 +26,7 @@ export default function TopBar({ children }) {
   const name = auth.user?.name || '';
   return (
     <header className="topbar">
-      <Brand />
+      {spectrum ? <SpectrumBrand /> : <Brand />}
       <div className="grow row">{children}</div>
       <span className="topbar-user">
         <span className="topbar-avatar" aria-hidden="true">{initials(name)}</span>

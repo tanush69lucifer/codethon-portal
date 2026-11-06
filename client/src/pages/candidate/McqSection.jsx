@@ -17,7 +17,7 @@ export default function McqSection({ mcqs, answers, review, index, setIndex, onA
         <div className="cz-q-head">
           <div className="cz-q-num">
             <span className="lbl">Question</span>
-            <span className="n">{pad2(index + 1)}</span>
+            <span className="n" data-n={pad2(index + 1)}>{pad2(index + 1)}</span>
             <span className="of">/ {pad2(mcqs.length)}</span>
           </div>
           <span className="cz-marks">

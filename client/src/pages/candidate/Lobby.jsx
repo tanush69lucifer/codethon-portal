@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { fmtDate, fmtDuration, md } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import TopBar from '../../components/TopBar';
+import { IrField, SpectrumDefs } from '../../components/Spectrum';
 import { ErrorState, PageLoader, StatusBadge, useAsync } from '../../components/ui';
 import {
   IconAlert,
@@ -40,7 +41,7 @@ export default function Lobby() {
   }, []);
 
   if (loading) return <PageLoader label="Loading contest lobby…" />;
-  if (error) return <div className="cz"><TopBar /><main className="page"><ErrorState error={error} onRetry={reload} /></main></div>;
+  if (error) return <div className="cz cz-spectrum"><TopBar spectrum /><main className="page"><ErrorState error={error} onRetry={reload} /></main></div>;
 
   const { contest, attempt, browser, counts, sebConfigUrl } = data;
   const serverNow = now + offset;
@@ -69,11 +70,13 @@ export default function Lobby() {
   };
 
   return (
-    <div className="cz">
-      <TopBar />
+    <div className="cz cz-spectrum">
+      <TopBar spectrum />
       <main className="page stack" style={{ gap: 20 }}>
         {/* ---------- hero ---------- */}
         <section className="cz-hero cz-rise">
+          <SpectrumDefs />
+          <IrField />
           <div className="cz-grid-bg" />
           <div className="row between" style={{ alignItems: 'flex-start' }}>
             <div>

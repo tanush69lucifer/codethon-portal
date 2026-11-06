@@ -56,6 +56,52 @@ function defineCodezisTheme(m) {
       'editorBracketHighlight.unexpectedBracket.foreground': '#FF5C6C',
     },
   });
+  // Phosphor CRT theme for the coding screen.
+  m.editor.defineTheme('codezis-crt', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: '', foreground: 'BFF5CC' },
+      { token: 'comment', foreground: '4C9C66', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'FFB547' },
+      { token: 'string', foreground: 'FFD9A0' },
+      { token: 'string.escape', foreground: 'FF9DE9' },
+      { token: 'number', foreground: 'FF9DE9' },
+      { token: 'type', foreground: '7FE3FF' },
+      { token: 'type.identifier', foreground: '7FE3FF' },
+      { token: 'identifier', foreground: 'BFF5CC' },
+      { token: 'annotation', foreground: 'FF8A4C' },
+      { token: 'delimiter', foreground: '7FC795' },
+      { token: 'operator', foreground: 'FFB547' },
+    ],
+    colors: {
+      'editor.background': '#030805',
+      'editor.foreground': '#BFF5CC',
+      'editorLineNumber.foreground': '#2A6E3F',
+      'editorLineNumber.activeForeground': '#6BFF8E',
+      'editor.lineHighlightBackground': '#6BFF8E12',
+      'editor.lineHighlightBorder': '#00000000',
+      'editorCursor.foreground': '#6BFF8E',
+      'editor.selectionBackground': '#6BFF8E33',
+      'editor.inactiveSelectionBackground': '#6BFF8E1A',
+      'editor.selectionHighlightBackground': '#FFB54722',
+      'editorBracketMatch.background': '#FFB54726',
+      'editorBracketMatch.border': '#FFB54788',
+      'editorIndentGuide.background1': '#123320',
+      'editorIndentGuide.activeBackground1': '#2F8A4A',
+      'editorWhitespace.foreground': '#163A22',
+      'editorGutter.background': '#030805',
+      'scrollbarSlider.background': '#2F8A4A55',
+      'scrollbarSlider.hoverBackground': '#2F8A4A99',
+      'scrollbarSlider.activeBackground': '#6BFF8E66',
+      'editorWidget.background': '#06110A',
+      'editorWidget.border': '#2F8A4A',
+      'editorBracketHighlight.foreground1': '#FFB547',
+      'editorBracketHighlight.foreground2': '#7FE3FF',
+      'editorBracketHighlight.foreground3': '#FF9DE9',
+      'editorBracketHighlight.unexpectedBracket.foreground': '#FF6B7F',
+    },
+  });
   // Re-measure once the bundled mono font has loaded so the cursor lines up.
   document.fonts?.ready?.then(() => m.editor.remeasureFonts()).catch(() => {});
 }
@@ -82,14 +128,14 @@ export default function CodeEditor({ value, onChange, editorCopyRef, path, fontS
     <Editor
       path={path}
       language="java"
-      theme="codezis"
+      theme="codezis-crt"
       value={value}
       onChange={(v) => onChange(v ?? '')}
       beforeMount={defineCodezisTheme}
       onMount={onMount}
       options={{
         fontSize,
-        fontFamily: "'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace",
+        fontFamily: "'Geist Mono Variable', 'JetBrains Mono Variable', ui-monospace, Menlo, Consolas, monospace",
         fontLigatures: false,
         lineHeight: 22,
         padding: { top: 14, bottom: 14 },

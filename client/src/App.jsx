@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { auth } from './lib/api';
 import { PageLoader, useToast } from './components/ui';
 import Login from './pages/Login';
 import CandidateHome from './pages/candidate/CandidateHome';
 import Lobby from './pages/candidate/Lobby';
+import Zix from './components/Zix';
 
 // Heavy pages (Monaco editor, admin tables) load on demand.
 const Exam = lazy(() => import('./pages/candidate/Exam'));
@@ -28,6 +29,9 @@ export default function App() {
   const user = useUser();
   const navigate = useNavigate();
   const toast = useToast();
+  const { pathname } = useLocation();
+  // Zix appears on the candidate side only, never in the organiser console.
+  const showZix = !pathname.startsWith('/admin') && (!user || user.role === 'CANDIDATE');
 
   useEffect(() => {
     const onLogout = (e) => {
@@ -51,6 +55,7 @@ export default function App() {
         <Route path="/admin/contest/:contestId" element={<Guard role="ADMIN"><ContestAdmin /></Guard>} />
         <Route path="*" element={<Navigate to={home} replace />} />
       </Routes>
+      {showZix && <Zix />}
     </Suspense>
   );
 }

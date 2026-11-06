@@ -5,101 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
     <link rel="icon" href="/genzis-z-hd.png" />
-    <meta name="theme-color" content="#120a1f" />
+    <meta name="theme-color" content="#0e0818" />
     <title>Codezis · powered by Genzis</title>
   </head>
   <body>
     <div id="root" data-app="1">
       <style>
         #genzis-boot-loader {
-          position: fixed;
-          inset: 0;
-          z-index: 99999;
-          background: radial-gradient(circle at 50% 48%, #ff7626 0%, #ff6a1e 65%, #f25b0e 100%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
+          position: fixed; inset: 0; z-index: 99999; overflow: hidden;
+          background: #0e0818;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
           user-select: none;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
         }
-        .genzis-boot-card {
-          position: relative;
-          width: 340px;
-          aspect-ratio: 406 / 309;
-          background: #ff6a1e;
-          border-radius: 18px;
-          overflow: hidden;
-          box-shadow: 0 16px 36px -8px rgba(22, 10, 34, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-        }
-        .genzis-boot-base {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          pointer-events: none;
-        }
-        .genzis-boot-z {
-          position: absolute;
-          left: 55.9113%;
-          top: 43.0421%;
-          width: 11.3301%;
-          height: 14.8867%;
-          transform-origin: 50% 50%;
-          will-change: transform;
-          animation: genzisBootRotate 1.4s linear infinite;
-          pointer-events: none;
-          filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.4));
-        }
-        @keyframes genzisBootRotate {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .genzis-boot-progress {
-          margin-top: 18px;
-          width: 130px;
-          height: 4px;
-          background: rgba(22, 10, 34, 0.22);
-          border-radius: 999px;
-          overflow: hidden;
-          position: relative;
-        }
-        .genzis-boot-bar {
-          position: absolute;
-          top: 0;
-          left: -50%;
-          width: 50%;
-          height: 100%;
-          background: #160a22;
-          border-radius: 999px;
-          animation: genzisBootPulse 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        @keyframes genzisBootPulse {
-          0% { left: -50%; width: 30%; }
-          50% { width: 65%; }
-          100% { left: 100%; width: 30%; }
-        }
-        .genzis-boot-label {
-          margin-top: 12px;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          color: #160a22;
-          opacity: 0.9;
-          text-align: center;
-        }
+        .gzb-field { position: absolute; inset: -15%; filter: blur(60px) saturate(1.2); opacity: 0.4; animation: gzbDrift 14s ease-in-out infinite alternate; }
+        .gzb-field i { position: absolute; border-radius: 50%; display: block; }
+        .gzb-field .a { width: 45%; height: 50%; left: 8%; top: 30%; background: radial-gradient(circle, #ff6a1f, rgba(255, 106, 31, 0) 68%); }
+        .gzb-field .b { width: 40%; height: 45%; left: 40%; top: 10%; background: radial-gradient(circle, #ff3fa4, rgba(255, 63, 164, 0) 68%); }
+        .gzb-field .c { width: 45%; height: 50%; left: 48%; top: 45%; background: radial-gradient(circle, #9d6bff, rgba(157, 107, 255, 0) 68%); }
+        @keyframes gzbDrift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-3%, 2%) scale(1.08) rotate(3deg); } }
+        .gzb-mark { position: relative; width: min(360px, 80vw); animation: gzbRise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .gzb-mark img { display: block; width: 100%; height: auto; }
+        @keyframes gzbRise { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+        .gzb-bar { position: relative; width: min(280px, 62vw); height: 4px; border-radius: 4px; background: #1e1630; overflow: hidden; }
+        .gzb-bar div { height: 100%; width: 40%; border-radius: 4px; background: linear-gradient(90deg, #ffc83d, #ff6a1f, #ff3fa4, #9d6bff, #2ec8ff, #8cff3a); animation: gzbSlide 1.4s cubic-bezier(0.6, 0, 0.4, 1) infinite; }
+        @keyframes gzbSlide { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+        .gzb-label { position: relative; font-size: 12px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: #a79fc2; }
+        @media (prefers-reduced-motion: reduce) { .gzb-field, .gzb-mark { animation: none; } }
       </style>
-      <div id="genzis-boot-loader">
-        <div class="genzis-boot-card">
-          <img src="/genzis-base-hd.png" alt="GENZIS" class="genzis-boot-base" />
-          <img src="/genzis-z-hd.png" alt="Z" class="genzis-boot-z" />
-        </div>
-        <div class="genzis-boot-progress">
-          <div class="genzis-boot-bar"></div>
-        </div>
-        <div class="genzis-boot-label">Loading Portal…</div>
+      <div id="genzis-boot-loader" role="status" aria-live="polite">
+        <div class="gzb-field" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+        <div class="gzb-mark"><img src="/genzis-spectrum.webp" alt="Genzis — Generations ahead" /></div>
+        <div class="gzb-bar" aria-hidden="true"><div></div></div>
+        <div class="gzb-label">Loading portal</div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
