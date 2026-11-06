@@ -338,3 +338,37 @@
   .cz-spectrum .exam-top .cz-sbrand-div, .cz-spectrum .exam-top .cz-sbrand-word, .cz-spectrum .exam-top .cz-monitor { display: none; }
   .cz-spectrum .exam-top .btn.primary { margin-left: auto; }
 }
+
+/* ---------- login breathing room (shorter laptop screens) ---------- */
+.cz-spectrum.cz-auth .cz-auth-art { gap: 28px; }
+.cz .cz-wordmark.cz-word { font-size: clamp(56px, min(8vw, 13vh), 124px); }
+.cz-spectrum .cz-terminal { margin-top: clamp(16px, 3vh, 30px); }
+.cz-spectrum.cz-auth .cz-auth-panel { padding-bottom: 150px; }
+
+/* =====================================================================
+   SPECTRUM LOADER (replaces the old orange Z-spin loader, used app-wide)
+   ===================================================================== */
+.gz-load-page { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #0e0818; overflow: hidden; }
+.gz-load-field { position: absolute; inset: -15%; filter: blur(60px) saturate(1.2); opacity: 0.4; animation: czIr 14s ease-in-out infinite alternate; pointer-events: none; }
+.gz-load-field i { position: absolute; border-radius: 50%; display: block; }
+.gz-load-field .a { width: 45%; height: 50%; left: 8%; top: 30%; background: radial-gradient(circle, #ff6a1f, rgba(255, 106, 31, 0) 68%); }
+.gz-load-field .b { width: 40%; height: 45%; left: 40%; top: 10%; background: radial-gradient(circle, #ff3fa4, rgba(255, 63, 164, 0) 68%); }
+.gz-load-field .c { width: 45%; height: 50%; left: 48%; top: 45%; background: radial-gradient(circle, #9d6bff, rgba(157, 107, 255, 0) 68%); }
+.gz-load { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; width: min(var(--gz-w), 80vw); }
+.gz-load-inline { display: flex; justify-content: center; padding: 28px 0; }
+.gz-load-mark { position: relative; width: 100%; animation: gzRise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.gz-load-mark img { display: block; width: 100%; height: auto; animation: gzGlow 2.4s ease-in-out infinite; }
+@keyframes gzRise { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes gzGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 63, 164, 0)); } 50% { filter: drop-shadow(0 0 22px rgba(255, 63, 164, 0.35)); } }
+.gz-load-px { position: absolute; width: 4%; aspect-ratio: 1; background: #ffc83d; box-shadow: 0 0 12px #ffb000; animation: czPx 3.2s ease-in-out infinite; }
+.gz-load-px.a { left: 2%; top: 6%; }
+.gz-load-px.b { left: 9%; top: 0; width: 2.6%; animation-delay: -1.1s; }
+.gz-load-px.c { left: -3%; top: 16%; width: 2.2%; animation-delay: -2s; }
+.gz-load-bar { width: 78%; height: 4px; border-radius: 4px; background: #1e1630; overflow: hidden; }
+.gz-load-bar div { height: 100%; width: 40%; border-radius: 4px; background: linear-gradient(90deg, #ffc83d, #ff6a1f, #ff3fa4, #9d6bff, #2ec8ff, #8cff3a); animation: gzBar 1.4s cubic-bezier(0.6, 0, 0.4, 1) infinite; }
+@keyframes gzBar { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+.gz-load-label { font: 500 12px 'Geist Mono Variable', ui-monospace, monospace; letter-spacing: 0.24em; text-transform: uppercase; color: #a79fc2; }
+@media (prefers-reduced-motion: reduce) {
+  .gz-load-field, .gz-load-mark, .gz-load-mark img, .gz-load-px { animation: none !important; }
+  .gz-load-bar div { animation-duration: 3s; }
+}

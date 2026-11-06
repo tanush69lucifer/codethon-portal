@@ -54,10 +54,10 @@ export function Ribbon({ style }) {
 /** Floating pixel squares taken from the logo. */
 export function Pixels() {
   const px = [
-    { left: '7%', top: '20%' },
-    { left: '11%', top: '15%', width: 9, height: 9, animationDelay: '-1.4s' },
-    { left: '4%', top: '13%', width: 16, height: 16, animationDelay: '-3s' },
-    { left: '14%', top: '22%', width: 7, height: 7, animationDelay: '-2.2s' },
+    { left: '78%', top: '9%' },
+    { left: '84%', top: '5%', width: 9, height: 9, animationDelay: '-1.4s' },
+    { left: '72%', top: '4%', width: 16, height: 16, animationDelay: '-3s' },
+    { left: '88%', top: '12%', width: 7, height: 7, animationDelay: '-2.2s' },
   ];
   return px.map((s, i) => <span key={i} className="cz-px" style={s} aria-hidden="true" />);
 }
