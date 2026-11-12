@@ -24,12 +24,29 @@ async function getProblem(id) {
   return doc;
 }
 
-async function claim() {
-  return Submission.findOneAndUpdate(
-    { status: 'QUEUED' },
-    { $set: { status: 'RUNNING', startedAt: new Date(), workerId } },
+// Two lanes: SUBMIT jobs are claimed ahead of RUN jobs, so sample runs cannot delay scored
+// submissions. Every `runEvery`-th claim is plain FIFO, which guarantees RUN jobs still move
+// when SUBMIT traffic is continuous. JUDGE_RUN_EVERY=1 restores the old pure-FIFO behaviour.
+let claims = 0;
+async function claimWhere(filter) {
+  const now = new Date();
+  const sub = await Submission.findOneAndUpdate(
+    { status: 'QUEUED', ...filter },
+    { $set: { status: 'RUNNING', startedAt: now, workerId } },
     { sort: { createdAt: 1 }, new: true }
   ).lean();
+  if (sub) {
+    const queueWaitMs = Math.max(0, now.getTime() - new Date(sub.createdAt).getTime());
+    Submission.updateOne({ _id: sub._id }, { $set: { queueWaitMs } }).catch(() => {});
+  }
+  return sub;
+}
+
+async function claim() {
+  claims += 1;
+  const runEvery = Math.max(1, config.judge.runEvery);
+  if (claims % runEvery === 0) return claimWhere({});
+  return (await claimWhere({ kind: 'SUBMIT' })) || claimWhere({});
 }
 
 async function processOne(sub) {

@@ -1,4 +1,5 @@
 // Candidate API. Mounted at /api/c. Every route needs a CANDIDATE token.
+const crypto = require('crypto');
 const router = require('express').Router();
 const { z } = require('zod');
 const config = require('../config');
@@ -302,6 +303,8 @@ router.put(
   })
 );
 
+const sha256 = (text) => crypto.createHash('sha256').update(String(text), 'utf8').digest('hex');
+
 const runSchema = z.object({
   code: z.string().min(1).max(config.limits.maxCodeBytes),
   input: z.string().max(config.limits.maxCustomInputBytes).nullable().optional(),
@@ -326,6 +329,7 @@ router.post(
       attemptId: attempt._id,
       userId: req.user.id,
       code: req.body.code,
+      codeHash: sha256(req.body.code),
       customInput: req.body.input ?? null,
     });
     await Attempt.updateOne({ _id: attempt._id }, { $set: { [`codeDrafts.${problem._id}`]: req.body.code } });
@@ -362,6 +366,7 @@ router.post(
       attemptId: attempt._id,
       userId: req.user.id,
       code: req.body.code,
+      codeHash: sha256(req.body.code),
     });
     await Attempt.updateOne({ _id: attempt._id }, { $set: { [`codeDrafts.${problem._id}`]: req.body.code } });
     send(res, { submissionId: sub._id }, 202);

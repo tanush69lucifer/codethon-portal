@@ -39,6 +39,8 @@ module.exports = {
     mode: process.env.JUDGE_MODE || 'docker',
     image: process.env.JUDGE_IMAGE || 'codethon-java-runner:latest',
     concurrency: num(process.env.JUDGE_CONCURRENCY, 2),
+    // Every Nth claim is plain FIFO; the rest take SUBMIT jobs first. 1 = pure FIFO (old behaviour).
+    runEvery: num(process.env.JUDGE_RUN_EVERY, 4),
     // Extra wall-clock allowance per test for JVM startup, added on top of the problem's time limit.
     jvmGraceMs: num(process.env.JUDGE_JVM_GRACE_MS, 600),
     compileTimeoutSec: num(process.env.JUDGE_COMPILE_TIMEOUT_SEC, 25),

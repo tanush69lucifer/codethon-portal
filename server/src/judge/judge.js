@@ -37,7 +37,7 @@ async function judgeSubmission(submission, problem) {
   }
   if (!cases.length) cases = [{ input: '', output: null }];
 
-  const { compileError, results } = await execute({
+  const { compileError, results, compileMs = null, sandboxMs = null } = await execute({
     code: submission.code,
     inputs: cases.map((c) => c.input),
     timeLimitMs: problem.timeLimitMs,
@@ -55,6 +55,9 @@ async function judgeSubmission(submission, problem) {
       total: cases.length,
       tests: [],
       runOutputs: [],
+      compileMs,
+      sandboxMs,
+      overheadMs: sandboxMs == null ? null : Math.max(0, sandboxMs - (compileMs || 0)),
     };
   }
 
@@ -72,8 +75,13 @@ async function judgeSubmission(submission, problem) {
     score = round2(codingScoreFromTests(scoringProblem, tests));
   }
 
+  const testsMs = tests.reduce((s, t) => s + (t.timeMs || 0), 0);
+
   return {
     verdict,
+    compileMs,
+    sandboxMs,
+    overheadMs: sandboxMs == null ? null : Math.max(0, sandboxMs - (compileMs || 0) - testsMs),
     compileOutput: '',
     score,
     maxScore,
