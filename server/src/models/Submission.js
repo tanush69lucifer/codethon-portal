@@ -34,11 +34,20 @@ const submissionSchema = new mongoose.Schema(
     workerId: { type: String, default: '' },
     startedAt: Date,
     finishedAt: Date,
+
+    // Instrumentation (all optional; older documents simply lack them).
+    codeHash: { type: String, default: '' }, // sha256 of the exact source, hex
+    queueWaitMs: { type: Number, default: null }, // createdAt -> claimed by a worker
+    compileMs: { type: Number, default: null }, // javac wall time inside the sandbox
+    sandboxMs: { type: Number, default: null }, // whole sandbox call: container start + compile + all tests
+    overheadMs: { type: Number, default: null }, // sandboxMs - compileMs - sum(test timeMs): container start, JVM-external cost
   },
   { timestamps: true }
 );
 
-submissionSchema.index({ status: 1, createdAt: 1 }); // queue scan
+submissionSchema.index({ status: 1, createdAt: 1 }); // queue scan (FIFO claims)
+submissionSchema.index({ status: 1, kind: 1, createdAt: 1 }); // queue scan (SUBMIT-first claims)
+submissionSchema.index({ problemId: 1, codeHash: 1 }); // duplicate-source analysis
 submissionSchema.index({ attemptId: 1, problemId: 1, createdAt: -1 });
 submissionSchema.index({ contestId: 1, kind: 1, problemId: 1 });
 

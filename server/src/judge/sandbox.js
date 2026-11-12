@@ -79,7 +79,7 @@ function dockerArgs(name, env, memoryMb) {
 }
 
 /**
- * @returns {Promise<{ compileError: string|null, results: Array<{exitCode:number,timeMs:number,stdout:string,stderr:string}> }>}
+ * @returns {Promise<{ compileError: string|null, results: Array<{exitCode:number,timeMs:number,stdout:string,stderr:string}>, compileMs: number|null, sandboxMs: number }>}
  */
 async function execute({ code, inputs, timeLimitMs, memoryMb }) {
   const className = detectClass(code);
@@ -95,6 +95,7 @@ async function execute({ code, inputs, timeLimitMs, memoryMb }) {
     MAX_OUT_KB: String(config.judge.maxOutputKb),
   };
   const input = await packJob(srcFile, code, inputs);
+  const t0 = Date.now();
   const name = `judge-${crypto.randomBytes(6).toString('hex')}`;
   const hardTimeoutMs = (config.judge.compileTimeoutSec + inputs.length * (Number(tlSec) + 1) + 20) * 1000;
 
@@ -155,9 +156,14 @@ async function execute({ code, inputs, timeLimitMs, memoryMb }) {
   child.stdin.end(input);
   await done;
 
+  const sandboxMs = Date.now() - t0;
   const files = await unpack(Buffer.concat(out));
   const status = (files.status || '').trim();
-  if (status === 'CE') return { compileError: files['compile.txt'] || 'Compilation failed', results: [] };
+  const compileRaw = Number((files.compile_ms || '').trim());
+  const compileMs = Number.isFinite(compileRaw) && (files.compile_ms || '').trim() !== '' ? compileRaw : null;
+  if (status === 'CE') {
+    return { compileError: files['compile.txt'] || 'Compilation failed', results: [], compileMs, sandboxMs };
+  }
   if (status !== 'OK') throw new Error(`Runner returned no status. stderr: ${errText.slice(0, 300)}`);
 
   const results = (files['results.txt'] || '')
@@ -173,7 +179,7 @@ async function execute({ code, inputs, timeLimitMs, memoryMb }) {
         stderr: files[`${i}.err`] ?? '',
       };
     });
-  return { compileError: null, results };
+  return { compileError: null, results, compileMs, sandboxMs };
 }
 
 module.exports = { execute, detectClass };

@@ -2,7 +2,7 @@
 # Java judge runner. Runs INSIDE the sandbox container (or on the host when JUDGE_MODE=local, dev only).
 #
 # stdin : tar archive containing <SRC_FILE> (e.g. Main.java) and tests/1.in .. tests/N.in
-# stdout: tar archive of out/  ->  status (OK|CE), compile.txt, results.txt ("i exitCode wallMs"), i.out, i.err
+# stdout: tar archive of out/  ->  status (OK|CE), compile.txt, compile_ms, results.txt ("i exitCode wallMs"), i.out, i.err
 # env   : SRC_FILE MAIN_CLASS N_TESTS TL_SEC MEM_MB COMPILE_TIMEOUT_SEC MAX_OUT_KB
 #
 # Nothing but the final tar may be written to stdout.
@@ -22,10 +22,13 @@ MEM="${MEM_MB:-256}"
 CT="${COMPILE_TIMEOUT_SEC:-25}"
 OUTKB="${MAX_OUT_KB:-2048}"
 
+cs=$(date +%s%N)
 if ! timeout -s KILL "$CT" javac -J-Xmx384m -J-XX:+UseSerialGC -encoding UTF-8 -nowarn -d classes "$SRC" > out/compile.txt 2>&1; then
   echo "CE" > out/status
+  echo $(( ($(date +%s%N) - cs) / 1000000 )) > out/compile_ms
 else
   echo "OK" > out/status
+  echo $(( ($(date +%s%N) - cs) / 1000000 )) > out/compile_ms
   : > out/results.txt
   consecutive_tle=0
   for i in $(seq 1 "$N"); do
