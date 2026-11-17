@@ -21,6 +21,7 @@
 //   --p95 MS     SLO: p95 latency limit for API calls, judge excluded (default 1500)
 //   --maxerr P   SLO: max error rate in percent (default 1)
 //   --out FILE   write all results as JSON (default loadtest-<timestamp>.json)
+//   --nosubmit   skip code submissions (API-only test, e.g. on Windows where the judge can't run)
 //
 // Exit code 0 = every stage passed the SLO, 1 = a stage failed (useful in CI).
 //
@@ -44,6 +45,7 @@ const MINUTES = Number(args.minutes || 2);
 const RAMP_MS = Number(args.ramp ?? 15) * 1000;
 const IPS = Number(args.ips || 0);
 const ENDRUSH = Boolean(args.endrush);
+const NOSUBMIT = Boolean(args.nosubmit);
 const SLO_P95 = Number(args.p95 || 1500);
 const SLO_ERR = Number(args.maxerr || 1);
 const STAGES = args.stages ? String(args.stages).split(',').map(Number).filter(Boolean) : [Number(args.users || 100)];
@@ -150,7 +152,7 @@ async function candidate(st, u, idx, contestId, startAt, until) {
       await call(st, ip, 'events', 'POST', `/api/c/contests/${contestId}/events`, token, { focused: true, events: [] });
       nextBeat = Date.now() + 20000;
     }
-    if (Date.now() > nextSubmit && (paper.problems || []).length) {
+    if (!NOSUBMIT && Date.now() > nextSubmit && (paper.problems || []).length) {
       const p = paper.problems[Math.floor(Math.random() * paper.problems.length)];
       const r = await call(st, ip, 'submit', 'POST', `/api/c/contests/${contestId}/problems/${p._id}/submit`, token, { code: CODE });
       if (r?.submissionId) {

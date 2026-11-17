@@ -13,7 +13,7 @@
   <img alt="MongoDB 7" src="https://img.shields.io/badge/MongoDB-7-7cf0a8?style=flat-square&labelColor=0e0818">
   <img alt="Java 21 judge" src="https://img.shields.io/badge/Judge-Java%2021-ff6a1f?style=flat-square&labelColor=0e0818">
   <img alt="Safe Exam Browser" src="https://img.shields.io/badge/Proctoring-Safe%20Exam%20Browser-ff3fa4?style=flat-square&labelColor=0e0818">
-  <img alt="Load tested" src="https://img.shields.io/badge/Load%20tested-300%20candidates-2ec8ff?style=flat-square&labelColor=0e0818">
+  <img alt="Load tested" src="https://img.shields.io/badge/Load%20tested-1000%20candidates-2ec8ff?style=flat-square&labelColor=0e0818">
 </p>
 
 <p align="center">
