@@ -434,6 +434,8 @@ const EVENT_CODES = {
   NOT_SEB: ['MED', false],
   NETWORK_OFFLINE: ['LOW', false],
   PAGE_RELOAD: ['LOW', false],
+  SPLIT_SCREEN: ['HIGH', true],
+  SCREENSHOT_KEY: ['MED', true],
 };
 
 const recentCounted = new Map(); // `${attemptId}:${code}` -> ts (one count per code per 5s)

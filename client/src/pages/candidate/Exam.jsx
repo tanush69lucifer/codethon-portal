@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../../lib/api';
+import { api, auth } from '../../lib/api';
 import { fmtDuration } from '../../lib/format';
 import { isSebUserAgent } from '../../lib/seb';
 import { useProctor } from '../../proctor/useProctor';
+import { watchSplitScreen } from '../../proctor/splitScreen';
+import ExamShield from '../../components/ExamShield';
 import { ErrorState, Loading, PageLoader, Modal, useToast } from '../../components/ui';
 import { IconAlert, IconArrowRight, IconClock, IconLock, IconMaximize, IconSave, IconShield, IconX } from '../../components/icons';
 import { CrtDecor, IrField, RisoDecor, SpectrumBrand, SpectrumDefs } from '../../components/Spectrum';
@@ -176,6 +178,8 @@ export default function Exam() {
   const isSeb = isSebUserAgent();
   const needFullscreen = Boolean(proctoring?.requireFullscreen && !isSeb && document.fullscreenEnabled);
   const [windowFocused, setWindowFocused] = useState(true);
+  const [splitScreen, setSplitScreen] = useState(false);
+  useEffect(() => watchSplitScreen(setSplitScreen), []);
   useEffect(() => {
     const onFs = () => setFullscreen(Boolean(document.fullscreenElement));
     const onFocus = () => setWindowFocused(true);
@@ -217,6 +221,8 @@ export default function Exam() {
       EXTENSION_IFRAME: 'A browser extension was detected on this page. Disable all extensions.',
       KNOWN_FINGERPRINT: 'An assistant extension was detected on this page. Disable it.',
       OVERLAY_NODE: 'Something is drawing over the test page. Close other tools and extensions.',
+      SPLIT_SCREEN: 'Split screen or a floating window was detected. This has been recorded.',
+      SCREENSHOT_KEY: 'Screenshots are not allowed. This has been recorded.',
     }[sig.code];
     if (msg) {
       setWarning(msg);
@@ -327,7 +333,7 @@ export default function Exam() {
   const lockAt = proctoring?.lockAfterViolations || 0;
   const notInFullscreen = needFullscreen && !fullscreen;
   const focusLost = !isSeb && !windowFocused;
-  const blocked = notInFullscreen || focusLost;
+  const blocked = notInFullscreen || focusLost || splitScreen;
   // Purely visual: share of the attempt window still left (for the timer bar).
   const startedAt = paper.attempt?.startedAt ? new Date(paper.attempt.startedAt).getTime() : 0;
   const totalMs = startedAt && deadline > startedAt ? deadline - startedAt : 0;
@@ -357,6 +363,7 @@ export default function Exam() {
         </button>
       </header>
 
+      <ExamShield user={auth.user} attemptId={paper.attempt?._id} />
       <div className={`exam-body ${blocked ? 'blur-content' : ''}`}>
         <nav className={`exam-nav ${section === 'mcq' ? 'on-mcq' : 'on-code'}`}>
           <div className="nav-sep">Section A</div>
@@ -438,13 +445,15 @@ export default function Exam() {
         <div className="gate">
           <div className="cz-gate-card">
             <span className="cz-icon-ring"><IconMaximize size={26} /></span>
-            <h2>{notInFullscreen ? 'Return to fullscreen' : '⚠️ Exam Suspended: Focus Lost'}</h2>
+            <h2>{splitScreen ? 'Exit split screen' : notInFullscreen ? 'Return to fullscreen' : '⚠️ Exam Suspended: Focus Lost'}</h2>
             <p>
-              {notInFullscreen
+              {splitScreen
+                ? 'The test only runs full screen. Close split screen or the floating window to continue. This is recorded as a violation.'
+                : notInFullscreen
                 ? 'The test must stay in fullscreen. Leaving fullscreen is recorded as a violation.'
                 : 'You switched windows, opened a screenshot/overlay tool, or clicked outside the exam. Click below to resume.'}
             </p>
-            <button
+            {!splitScreen && (<button
               className="btn primary lg"
               onClick={() => {
                 window.focus();
@@ -454,7 +463,8 @@ export default function Exam() {
                 }
               }}
             >
-              <IconMaximize size={16} /> {notInFullscreen ? 'Go fullscreen' : 'Resume exam'}            </button>
+              <IconMaximize size={16} /> {notInFullscreen ? 'Go fullscreen' : 'Resume exam'}
+            </button>)}
           </div>
         </div>
       )}

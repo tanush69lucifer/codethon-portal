@@ -5,7 +5,7 @@ import { isSebUserAgent } from '../lib/seb';
 
 const FLUSH_MS = 4000;
 const HEARTBEAT_MS = 20000;
-const URGENT = new Set(['FULLSCREEN_EXIT', 'TAB_HIDDEN', 'EXTENSION_IFRAME', 'KNOWN_FINGERPRINT', 'MULTI_SCREEN', 'OVERLAY_NODE']);
+const URGENT = new Set(['SPLIT_SCREEN', 'SCREENSHOT_KEY', 'FULLSCREEN_EXIT', 'TAB_HIDDEN', 'EXTENSION_IFRAME', 'KNOWN_FINGERPRINT', 'MULTI_SCREEN', 'OVERLAY_NODE']);
 
 /**
  * Runs the detector during an active attempt and sends events + heartbeats.

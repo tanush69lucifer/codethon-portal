@@ -486,3 +486,37 @@
   .cz-terminal-body div { opacity: 1; }
   .cz-check circle, .cz-check path { stroke-dashoffset: 0; }
 }
+
+/* ---------- anti-leak shield (watermark + anti-scan pattern) ---------- */
+.cz-watermark,
+.cz-antiscan {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 55; /* above the paper, below toasts/modals/gates */
+  -webkit-user-select: none;
+  user-select: none;
+}
+.cz-watermark {
+  background-repeat: repeat;
+  opacity: 0.14;
+}
+.cz-antiscan {
+  opacity: 0.05;
+  background-image:
+    repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 4px);
+  animation: czScanDrift 2.4s linear infinite;
+}
+@keyframes czScanDrift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 6px, 8px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cz-antiscan { animation: none; }
+}
+@media print {
+  /* printing the paper prints only the watermark */
+  .exam-body { display: none !important; }
+  .cz-watermark { opacity: 0.6; }
+}

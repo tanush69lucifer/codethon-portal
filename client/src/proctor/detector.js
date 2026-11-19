@@ -1,3 +1,5 @@
+import { watchSplitScreen } from './splitScreen';
+
 // In-browser integrity detector (ported + trimmed from Browser_overlay_detection_dashboard).
 // Emits small signals only: never keystrokes, typed code, clipboard contents or page text.
 //
@@ -119,6 +121,24 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
       }
     },
     true
+  );
+
+  // ---- screenshot key: wipe the clipboard so a PrintScreen grab is lost ----
+  on(window, 'keyup', (e) => {
+    if ((e.key || '').toLowerCase() !== 'printscreen') return;
+    try {
+      navigator.clipboard?.writeText?.('').catch(() => {});
+    } catch {
+      /* clipboard not available */
+    }
+    emit('SCREENSHOT_KEY');
+  }, true);
+
+  // ---- split-screen / floating window on phones and tablets ----
+  cleanups.push(
+    watchSplitScreen((split) => {
+      if (split) emit('SPLIT_SCREEN', { w: window.innerWidth, h: window.innerHeight });
+    })
   );
 
   // ---- devtools heuristic (docked devtools shrink the viewport) ----

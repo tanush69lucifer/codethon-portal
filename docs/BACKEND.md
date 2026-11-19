@@ -165,7 +165,7 @@ Every exam action (`paper`, `mcq`, `drafts`, `run`, `submit`) goes through `acti
 
 The detector lives in `client/src/proctor/detector.js` and is batched by `useProctor.js`. The full list of codes and severities is `EVENT_CODES` in `candidate.routes.js`.
 
-- Counted towards auto-lock (one count per code per 5 s): TAB_HIDDEN, FULLSCREEN_EXIT, MULTI_SCREEN, EXTENSION_IFRAME, KNOWN_FINGERPRINT, OVERLAY_NODE.
+- Counted towards auto-lock (one count per code per 5 s): TAB_HIDDEN, FULLSCREEN_EXIT, MULTI_SCREEN, EXTENSION_IFRAME, KNOWN_FINGERPRINT, OVERLAY_NODE, SPLIT_SCREEN, SCREENSHOT_KEY.
 - Logged only: WINDOW_BLUR, PASTE_BLOCKED, COPY_BLOCKED, CONTEXT_MENU, SHORTCUT_BLOCKED, DEVTOOLS_SUSPECTED, FOREIGN_SHADOW_ROOT, DOM_INJECTION, NOT_SEB, NETWORK_OFFLINE, PAGE_RELOAD.
 - `lockAfterViolations` (0 = off) sets the attempt to LOCKED. An admin can unlock it, add time or force-submit from Live monitor.
 - Paste: outside text is blocked. Text the candidate copied inside the editor can be pasted back.
