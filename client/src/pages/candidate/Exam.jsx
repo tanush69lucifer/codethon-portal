@@ -51,6 +51,7 @@ export default function Exam() {
   const [finishing, setFinishing] = useState(false);
   const pendingAnswers = useRef({}); // mcqId -> choice not yet saved
   const editorCopyRef = useRef('');
+  const whereRef = useRef(''); // what is on screen right now, attached to screenshot / split-screen logs
   const finishedRef = useRef(false);
   const reviewKey = `cp_review_${contestId}`;
 
@@ -236,6 +237,7 @@ export default function Exam() {
     enabled: active,
     blockPaste: proctoring?.blockPaste !== false,
     editorCopyRef,
+    whereRef,
     onServer,
     onLocalSignal,
   });
@@ -281,6 +283,12 @@ export default function Exam() {
   const mcqs = paper?.mcqs || [];
   const answeredCount = Object.keys(answers).length;
   const currentProblem = useMemo(() => problems.find((p) => p._id === section), [problems, section]);
+  if (section === 'mcq') {
+    whereRef.current = mcqs.length ? `MCQ Q${mcqIndex + 1} (${mcqs[mcqIndex]?._id || '?'})` : 'MCQ';
+  } else {
+    const i = problems.findIndex((p) => p._id === section);
+    whereRef.current = i >= 0 ? `Problem ${String.fromCharCode(65 + i)}: ${problems[i].title}` : 'Coding';
+  }
 
   // ---------- render ----------
   if (ended) {

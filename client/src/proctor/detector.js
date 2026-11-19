@@ -3,7 +3,8 @@ import { watchSplitScreen } from './splitScreen';
 // In-browser integrity detector (ported + trimmed from Browser_overlay_detection_dashboard).
 // Emits small signals only: never keystrokes, typed code, clipboard contents or page text.
 //
-// startDetector({ onSignal, blockPaste, isSeb, editorCopyRef }) -> stop()
+// startDetector({ onSignal, blockPaste, isSeb, editorCopyRef, whereRef }) -> stop()
+// whereRef.current is a short label of what is on screen ("MCQ Q14", "Problem B").
 // onSignal({ code, meta }) is called for every signal (the caller batches + sends them).
 
 const KNOWN_FINGERPRINTS = [
@@ -32,7 +33,8 @@ function shortHash(value) {
   return (h >>> 0).toString(36).slice(0, 7);
 }
 
-export function startDetector({ onSignal, blockPaste = true, isSeb = false, editorCopyRef = { current: '' } }) {
+export function startDetector({ onSignal, blockPaste = true, isSeb = false, editorCopyRef = { current: '' }, whereRef = { current: '' } }) {
+  const where = () => String(whereRef.current || '').slice(0, 60);
   const emit = (code, meta = {}) => {
     try {
       onSignal({ code, t: Date.now(), meta });
@@ -131,13 +133,13 @@ export function startDetector({ onSignal, blockPaste = true, isSeb = false, edit
     } catch {
       /* clipboard not available */
     }
-    emit('SCREENSHOT_KEY');
+    emit('SCREENSHOT_KEY', { where: where() });
   }, true);
 
   // ---- split-screen / floating window on phones and tablets ----
   cleanups.push(
     watchSplitScreen((split) => {
-      if (split) emit('SPLIT_SCREEN', { w: window.innerWidth, h: window.innerHeight });
+      if (split) emit('SPLIT_SCREEN', { where: where(), w: window.innerWidth, h: window.innerHeight });
     })
   );
 

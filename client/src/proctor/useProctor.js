@@ -11,7 +11,7 @@ const URGENT = new Set(['SPLIT_SCREEN', 'SCREENSHOT_KEY', 'FULLSCREEN_EXIT', 'TA
  * Runs the detector during an active attempt and sends events + heartbeats.
  * onServer(response) receives { status, violations, deadlineAt, serverNow, lockedReason }.
  */
-export function useProctor({ contestId, enabled, blockPaste, editorCopyRef, onServer, onLocalSignal }) {
+export function useProctor({ contestId, enabled, blockPaste, editorCopyRef, whereRef, onServer, onLocalSignal }) {
   const queue = useRef([]);
   const lastSent = useRef(0);
   const sending = useRef(false);
@@ -44,6 +44,7 @@ export function useProctor({ contestId, enabled, blockPaste, editorCopyRef, onSe
       isSeb: isSebUserAgent(),
       blockPaste,
       editorCopyRef,
+      whereRef,
       onSignal: (sig) => {
         queue.current.push(sig);
         if (queue.current.length > 300) queue.current.splice(0, queue.current.length - 300);
@@ -69,5 +70,5 @@ export function useProctor({ contestId, enabled, blockPaste, editorCopyRef, onSe
       stop();
       flush(true);
     };
-  }, [contestId, enabled, blockPaste, editorCopyRef]);
+  }, [contestId, enabled, blockPaste, editorCopyRef, whereRef]);
 }
